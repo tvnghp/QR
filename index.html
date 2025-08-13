@@ -7,67 +7,106 @@
   <link rel="icon" href="agribank-logo.png" type="image/png">
   <link rel="apple-touch-icon" href="agribank-logo.png">
   <style>
-  :root{ --primary:#7a001f; --primary-600:#5f0017; --accent:#c2a65c;
-    --bg:#ffffff; --text:#1f1f1f; --muted:#666; --border:#e8e8e8; --thead-bg:#f7eef1; }
-  *{box-sizing:border-box} html,body{height:100%}
+  :root{
+    --primary:#7a001f; --primary-600:#5f0017; --accent:#c2a65c;
+    --bg:#ffffff; --text:#1f1f1f; --muted:#666; --border:#e8e8e8; --thead-bg:#f7eef1;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:var(--text)}
-  header.hero{display:flex;align-items:center;gap:10px;padding:6px 14px;border-bottom:2px solid var(--primary);background:#fff}
+  body.no-scroll{overflow:hidden}
+
+  /* Header */
+  header.hero{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:2px solid var(--primary);background:#fff}
   header.hero .logo{height:40px;width:40px;object-fit:contain}
   header.hero .title{flex:1;text-align:center}
   header.hero h1{margin:0;font-size:20px;line-height:1.1;letter-spacing:.6px;text-transform:uppercase;color:var(--primary)}
   header.hero h3{margin:2px 0 0;font-size:18px;line-height:1.1;font-weight:800;color:var(--primary);letter-spacing:.9px;text-transform:uppercase}
   header.hero .ghost{width:40px;height:40px}
+
   main{max-width:1100px;margin:20px auto;padding:0 16px}
+
   .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+
   label{display:block;font-weight:600;margin:8px 0 6px}
-  input[type="text"],input[type="password"],input[type="url"],textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px}
+  input[type="text"],input[type="password"],input[type="url"],textarea{
+    width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:16px;min-height:44px
+  }
   input:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(122,0,31,.12)}
-  .grid{display:grid;gap:12px} .grid.cols-3{grid-template-columns:repeat(3,1fr)} .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+
+  .grid{display:grid;gap:12px}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+  .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+
   .actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-  button{cursor:pointer;border:0;padding:10px 14px;border-radius:10px;font-weight:700;letter-spacing:.2px}
-  .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-600)}
-  .btn-secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)} .btn-secondary:hover{background:#faf4f6}
+  button{
+    cursor:pointer;border:0;padding:12px 14px;border-radius:10px;font-weight:700;letter-spacing:.2px;min-height:44px;
+    -webkit-tap-highlight-color:transparent
+  }
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-600)}
+  .btn-secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+  .btn-secondary:hover{background:#faf4f6}
   .btn-danger{background:#b42318;color:#fff}
-  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
   .toolbar .spacer{flex:1}
-  table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
-  thead th{background:var(--thead-bg);color:var(--primary);font-weight:700}
-  th,td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:left;font-size:13px;vertical-align:top}
-  tbody tr:nth-child(even){background:#fbfbfb} tbody tr:hover{background:#f6f6f6}
+
+  /* Bảng + wrapper kéo ngang trên mobile */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--border);background:#fff}
+  table{width:100%;border-collapse:separate;border-spacing:0}
+  thead th{background:var(--thead-bg);color:var(--primary);font-weight:700;position:sticky;top:0;z-index:1}
+  th,td{padding:10px 10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;vertical-align:top;white-space:nowrap}
+  tbody tr:nth-child(even){background:#fbfbfb}
+  tbody tr:hover{background:#f6f6f6}
+
   .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   .qr{width:56px;height:56px;object-fit:contain;border:1px solid var(--border);border-radius:8px;background:#fff}
   .empty{color:#777;font-style:italic;padding:12px}
   a{color:var(--primary);text-decoration:none}
   .muted{color:var(--muted);font-size:12px}
-  .inline-btns button{padding:6px 10px;font-weight:600;border-radius:8px}
+  .inline-btns button{padding:8px 10px;border-radius:8px}
   .inline-btns .sep{color:#bbb}
-  #list{margin-top:12px} /* cách xa nút và bảng thêm chút */
+
+  .tip{background:#fff7e6;border:1px solid #ffe7ba;padding:10px 12px;border-radius:10px;color:#7a4b00}
+  #qrStatus{display:none;align-items:center;gap:8px;margin:8px 0}
+  #qrStatus.show{display:flex}
+
+  /* Footer */
   .site-footer{margin-top:28px;background:var(--primary);color:#fff}
   .site-footer .inner{max-width:1100px;margin:0 auto;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   .site-footer .copy{display:flex;flex-direction:column;gap:4px}
   .site-footer .line1{font-weight:600;letter-spacing:.2px}
   .site-footer .line2{font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:.6px}
   .site-footer a{color:#fff;text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.6)}
-  /* Modal */
+
+  /* Modal bản đồ */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999}
   .modal.hidden{display:none}
   .modal .content{width:min(900px,96vw);height:min(74vh,720px);background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;flex-direction:column;padding:12px}
   #map{flex:1;border-radius:12px;border:1px solid var(--border)}
-  /* QR status banner */
-  .tip{background:#fff7e6;border:1px solid #ffe7ba;padding:10px 12px;border-radius:10px;color:#7a4b00}
-  #qrStatus{display:none;align-items:center;gap:8px;margin:8px 0}
-  #qrStatus.show{display:flex}
-  @media (max-width: 900px){ .grid.cols-3{grid-template-columns:1fr} }
-  header.hero .title h1, header.hero .title h3{white-space:nowrap}
-  @media (max-width:720px){ header.hero{flex-direction:column;text-align:center} header.hero .ghost{display:none} header.hero .title h1,header.hero .title h3{white-space:normal} }
-  /* Pretty GitHub block */
+
+  /* Khối GitHub */
   .gh-wrap{display:flex;gap:12px;align-items:flex-start}
   .gh-badge{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#fff,#f7eef1);display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
   .gh-badge svg{width:30px;height:30px;fill:var(--primary)}
   .gh-body{flex:1}
-  .pill{display:inline-block;padding:4px 8px;border:1px solid var(--border);border-radius:999px;font-size:12px;margin-right:6px;background:#fff}
-  .muted2{color:#555}
+
+  /* Mobile tweaks */
+  header.hero .title h1, header.hero .title h3{white-space:nowrap}
+  @media (max-width:900px){ .grid.cols-3{grid-template-columns:1fr} }
+  @media (max-width:720px){
+    header.hero{flex-direction:column;text-align:center}
+    header.hero .ghost{display:none}
+    header.hero .title h1, header.hero .title h3{white-space:normal}
+    .toolbar{position:sticky;top:0;background:#fff;padding:8px 0;margin-bottom:8px;z-index:50;border-bottom:1px solid #eee}
+    .actions button{flex:1}
+    .qr{width:48px;height:48px}
+    th.hide-sm, td.hide-sm{display:none}
+    .modal .content{width:100vw;height:100vh;border-radius:0;padding:10px}
+  }
 </style>
+  <!-- Leaflet CSS & vendor -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
@@ -104,7 +143,7 @@
         </div>
         <div>
           <label for="address">Địa chỉ (nếu không có link)</label>
-          <input id="address" type="text" placeholder="VD: 10 Chùa Bộc, Đống Đa, Hà Nội" />
+          <input id="address" type="text" placeholder="VD: Số 08-10, Nam Kỳ Khởi Nghĩa, Phường Ninh Kiều, TP. Cần Thơ" />
         </div>
         <div>
           <label for="mapsUrl">Hoặc dán link Google Maps</label>
@@ -157,7 +196,7 @@
       <div class="toolbar">
         <h2 style="margin:0">Danh sách đã nhập</h2>
         <div class="spacer"></div>
-        <input id="q" type="text" placeholder="Tìm theo tên/chi nhánh/mã KH/sđt/cán bộ" style="min-width:260px; padding:8px 10px; border:1px solid #ddd; border-radius:10px;" />
+        <input id="q" type="text" placeholder="Tìm theo tên/chi nhánh/mã KH/sđt/cán bộ" style="min-width:220px; padding:10px 10px; border:1px solid #ddd; border-radius:10px;" />
         <button class="btn-secondary" id="btnZipSelected" title="Tải ZIP các QR đã chọn">ZIP QR (đã chọn)</button>
         <button class="btn-secondary" id="btnPrintA4" title="In nhiều tem trên 1 A4 cho các dòng đã chọn">In A4 (đã chọn)</button>
         <button class="btn-danger" id="btnClearAll" title="Xóa toàn bộ trong trình duyệt (không ảnh hưởng GitHub)">Xóa toàn bộ</button>
@@ -175,12 +214,7 @@
       </h2>
       <div class="gh-wrap">
         <div class="gh-body">
-          <div class="muted2" style="margin-bottom:8px">
-            <span class="pill">Owner: <b>tvnghp</b></span>
-            <span class="pill">Repo: <b>QR</b></span>
-            <span class="pill">Nhánh: <b>main</b></span>
-            <span class="pill">File: <b>data.xlsx</b></span>
-          </div>
+          <!-- Ẩn hiển thị Owner/Repo/Nhánh/File theo yêu cầu -->
           <div class="grid cols-3">
             <div>
               <label for="ghToken">GitHub Token (repo scope)</label>
@@ -214,7 +248,7 @@
   </footer>
 
 <script>
-// ===== Utilities =====
+/* ========= Utilities ========= */
 const LS_KEY='qr_maps_items_v3';
 function uid(n=8){ return Math.random().toString(36).slice(2,2+n); }
 function nowISO(){ return new Date().toISOString(); }
@@ -228,7 +262,7 @@ function recall(k){ try{ return localStorage.getItem(k)||'' }catch(e){ return ''
 async function sha256Hex(str){ const enc=new TextEncoder().encode(str); const buf=await crypto.subtle.digest('SHA-256',enc); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
 function randomHex(bytes=8){ const a=new Uint8Array(bytes); crypto.getRandomValues(a); return Array.from(a).map(b=>b.toString(16).padStart(2,'0')).join(''); }
 
-// ===== QR loader =====
+/* ========= QR loader ========= */
 function loadScriptOnce(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.async=false; s.defer=true; s.onload=()=>res(); s.onerror=()=>rej(new Error('Failed '+src)); document.head.appendChild(s); }); }
 let __qrReady=null;
 async function ensureQRCode(maxWaitMs=15000){
@@ -242,31 +276,39 @@ async function ensureQRCode(maxWaitMs=15000){
   banner?.classList.add('show'); throw new Error('QRCode chưa sẵn sàng.');
 }
 
-// ===== QR Logo =====
+/* ========= QR Logo ========= */
 const QR_LOGO={ enabled:true, src:'agribank-logo.png', sizeRatio:0.22, paddingRatio:0.06, rounded:10 };
 let __logoImg=null;
 async function loadLogo(){ if(!QR_LOGO.enabled) return null; if(__logoImg) return __logoImg;
   return new Promise((r)=>{ const img=new Image(); img.onload=()=>{__logoImg=img;r(img)}; img.onerror=()=>r(null); img.crossOrigin='anonymous'; img.src=QR_LOGO.src; });
 }
-function roundRect(ctx,x,y,w,h,r){ const rr=Math.min(r,w/2,h/2); ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y,y+h,rr); ctx.arcTo(x,y+y,h,x,y,rr); }
+function drawRoundedRect(ctx,x,y,w,h,r){
+  const rr=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr,y);
+  ctx.arcTo(x+w,y,x+w,y+h,rr);
+  ctx.arcTo(x+w,y+h,x,y,y+h,rr);
+  ctx.arcTo(x,y+h,x,y,rr);
+  ctx.arcTo(x,y,x+w,y,rr);
+  ctx.closePath();
+}
 
-// ===== Schema & state =====
+/* ========= Schema & state ========= */
 const HEADERS=['id','code','name','address','mapsUrl','createdAt','note','phone','branch','cccd','customerCode','officer','pinSalt','pinHash'];
 function loadItems(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||[] }catch(e){ return [] } }
 function saveItems(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
 function sheetToJsonStrict(ws){
   const arr=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
   return arr.map(r=>({ id:r.id??'', code:r.code??'', name:r.name??'', address:r.address??'', mapsUrl:r.mapsUrl??'', createdAt:r.createdAt??'',
-    note:r.note??'', phone:r.phone??'', branch: r.branch ?? r.group ?? '', cccd:r.cccd??'', customerCode:r.customerCode??'',
+    note:r.note??'', phone:r.phone??'', branch:r.branch ?? r.group ?? '', cccd:r.cccd??'', customerCode:r.customerCode??'',
     officer:r.officer??'', pinSalt:r.pinSalt??'', pinHash:r.pinHash??'' }));
 }
 let items=loadItems();
-// migrate từ group -> branch
+// migrate group -> branch
 if(Array.isArray(items)){ let migrated=false; for(const it of items){ if(it && it.group && !it.branch){ it.branch=it.group; migrated=true; } } if(migrated) saveItems(items); }
-
 let selectedIds=new Set();
 
-// Seed demo nếu rỗng
+/* ========= Seed demo nếu rỗng ========= */
 function seedDemo(){
   try{ if(items.length>0) return; if(localStorage.getItem('qr_maps_seeded_v2')) return; }catch(e){}
   const addr='02 Hòa Bình, Ninh Kiều, Cần Thơ';
@@ -275,7 +317,7 @@ function seedDemo(){
   try{ localStorage.setItem('qr_maps_seeded_v2','1'); }catch(e){}
 }
 
-// Auto-load data.xlsx nếu có
+/* ========= Auto-load data.xlsx nếu có ========= */
 (async function autoLoad(){
   try{
     const res=await fetch('data.xlsx?t='+Date.now(),{cache:'no-store'});
@@ -293,7 +335,7 @@ function seedDemo(){
   renderTable();
 })();
 
-// CRUD
+/* ========= CRUD ========= */
 async function handleCreate(){
   const officer=document.getElementById('officer').value.trim();
   const pin=document.getElementById('pin').value.trim();
@@ -316,7 +358,7 @@ async function handleCreate(){
   remember('lastOfficer', officer); if(pin) remember('lastPin', pin);
 }
 
-// ZIP & In A4
+/* ========= ZIP & In A4 ========= */
 function getSelectedItems(){ return items.filter(x=> selectedIds.has(x.id)); }
 function dataURLtoBlob(dataURL){ const parts=dataURL.split(','); const bstr=atob(parts[1]); const u8=new Uint8Array(bstr.length); for(let i=0;i<bstr.length;i++) u8[i]=bstr.charCodeAt(i); return new Blob([u8],{type:'image/png'}); }
 async function zipSelected(){
@@ -362,7 +404,7 @@ async function printA4Selected(){
   win.document.close();
 }
 
-// QR helpers
+/* ========= QR helpers ========= */
 async function makeQRDataUrl(text,size=512){
   try{ await ensureQRCode(); }catch(e){}
   let lastErr=null;
@@ -376,9 +418,7 @@ async function makeQRDataUrl(text,size=512){
         if(img){
           const ctx=canvas.getContext('2d'); const logoSize=Math.round(size*QR_LOGO.sizeRatio); const pad=Math.round(size*QR_LOGO.paddingRatio);
           const dx=Math.round((size-logoSize)/2); const dy=Math.round((size-logoSize)/2);
-          ctx.save(); ctx.fillStyle='#fff'; ctx.beginPath();
-          const rr=Math.min(QR_LOGO.rounded,logoSize/2+pad); const x=dx-pad,y=dy-pad,w=logoSize+2*pad,h=logoSize+2*pad;
-          ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath(); ctx.fill(); ctx.restore();
+          ctx.save(); ctx.fillStyle='#fff'; drawRoundedRect(ctx, dx-pad, dy-pad, logoSize+2*pad, logoSize+2*pad, QR_LOGO.rounded); ctx.fill(); ctx.restore();
           ctx.drawImage(img,dx,dy,logoSize,logoSize);
         }
       }catch{}
@@ -387,15 +427,10 @@ async function makeQRDataUrl(text,size=512){
   }
   throw lastErr||new Error('Không tạo được QR');
 }
-
 async function downloadQR(url,filename){
-  try{
-    const a=document.createElement('a');
-    a.href=await makeQRDataUrl(url,1024);
-    a.download=filename||'qr.png'; a.click();
-  }catch(e){ alert('Không tạo được QR.'); }
+  try{ const a=document.createElement('a'); a.href=await makeQRDataUrl(url,1024); a.download=filename||'qr.png'; a.click(); }
+  catch(e){ alert('Không tạo được QR.'); }
 }
-
 async function openPrint(code,mode='full'){
   const it=items.find(x=>x.code===code); if(!it) return;
   let qr=''; try{ qr=await makeQRDataUrl(it.mapsUrl,1024); }catch(e){ alert('Không tạo được QR (mạng chậm).'); return; }
@@ -424,7 +459,7 @@ h1{font-size:20px;margin:0 0 4px}.addr{color:#444}.meta{font-size:12px;color:#55
 </div></div></body></html>`); win.document.close();
 }
 
-// Map helpers
+/* ========= Map helpers ========= */
 function gmLinkFromLatLng(lat,lng){ return `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lng.toFixed(6)}`; }
 function openMapsTab(){ const addr=document.getElementById('address').value.trim(); const url=addr?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`:'https://maps.google.com/'; window.open(url,'_blank'); }
 
@@ -434,13 +469,10 @@ function useCurrentPosition(){
     async pos => {
       const { latitude: lat, longitude: lng } = pos.coords || {};
       document.getElementById('mapsUrl').value = gmLinkFromLatLng(lat, lng);
-      // Hỏi trước khi ghi đè địa chỉ
       try{
         const addr = await reverseGeocode(lat, lng);
         const el = document.getElementById('address');
-        if (addr && ( !el.value || confirm('Ghi đè địa chỉ bằng vị trí hiện tại?') )) {
-          el.value = addr;
-        }
+        if (addr && ( !el.value || confirm('Ghi đè địa chỉ bằng vị trí hiện tại?') )) el.value = addr;
       }catch{}
     },
     () => alert('Không lấy được vị trí hiện tại.'),
@@ -450,8 +482,9 @@ function useCurrentPosition(){
 
 let map, marker, picked;
 function openPickOnMap(){
-  const modal = document.getElementById('mapModal');
+  const modal=document.getElementById('mapModal');
   modal.classList.remove('hidden');
+  document.body.classList.add('no-scroll');
 
   if (!map) {
     map = L.map('map', { zoomControl: true });
@@ -466,16 +499,19 @@ function openPickOnMap(){
         const ll = [pos.coords.latitude, pos.coords.longitude];
         map.setView(ll, 16);
         setPicked({ lat: ll[0], lng: ll[1] });
-        setTimeout(() => map.invalidateSize(), 120);
+        setTimeout(() => map.invalidateSize(), 60);
       },
-      () => { setTimeout(() => map.invalidateSize(), 120); },
+      () => setTimeout(() => map.invalidateSize(), 60),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   } else {
-    setTimeout(() => map.invalidateSize(), 120);
+    setTimeout(() => map.invalidateSize(), 60);
   }
 }
-function closePickOnMap(){ document.getElementById('mapModal').classList.add('hidden'); }
+function closePickOnMap(){
+  document.getElementById('mapModal').classList.add('hidden');
+  document.body.classList.remove('no-scroll');
+}
 function setPicked(latlng){
   picked = latlng;
   if (!marker) { marker = L.marker(latlng).addTo(map); } else { marker.setLatLng(latlng); }
@@ -485,18 +521,28 @@ function setPicked(latlng){
 async function reverseGeocode(lat,lng){ const res=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,{headers:{'Accept':'application/json'}}); if(!res.ok) return ''; const j=await res.json(); return j.display_name||''; }
 async function searchPlaceByText(q){ const res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`,{headers:{'Accept':'application/json'}}); if(!res.ok) return null; const arr=await res.json(); if(!arr||!arr[0]) return null; return {lat:parseFloat(arr[0].lat),lng:parseFloat(arr[0].lon),label:arr[0].display_name}; }
 
-// Render, edit, delete
+/* ========= Render ========= */
 function renderTable(){
   const wrap=document.getElementById('list'); if(!wrap){ console.warn('#list missing'); return; }
   let arr=items.slice(); const q=(document.getElementById('q').value||'').trim().toLowerCase();
   if(q){ arr=arr.filter(x=>[x.name,x.branch,x.customerCode,x.phone,x.officer].some(v=>String(v||'').toLowerCase().includes(q))); }
   if(!arr.length){ wrap.innerHTML='<div class="empty">Chưa có mục nào</div>'; return; }
   wrap.innerHTML=`
+    <div class="table-wrap">
     <table>
       <thead><tr>
         <th><input type="checkbox" id="selAll" title="Chọn/Bỏ chọn tất cả"></th>
-        <th>QR</th><th>Tên</th><th>Địa chỉ</th><th>Cán bộ</th><th>Chi nhánh</th>
-        <th>Mã KH</th><th>SĐT</th><th>CCCD</th><th>Link Maps</th><th>Mã</th><th>Hành động</th>
+        <th>QR</th>
+        <th>Tên</th>
+        <th class="hide-sm">Địa chỉ</th>
+        <th class="hide-sm">Cán bộ</th>
+        <th>Chi nhánh</th>
+        <th>Mã KH</th>
+        <th class="hide-sm">SĐT</th>
+        <th class="hide-sm">CCCD</th>
+        <th class="hide-sm">Link Maps</th>
+        <th class="hide-sm">Mã</th>
+        <th>Hành động</th>
       </tr></thead>
       <tbody>
         ${arr.map(x=>`
@@ -504,30 +550,31 @@ function renderTable(){
             <td><input type="checkbox" class="sel" data-id="${x.id}" ${selectedIds.has(x.id)?'checked':''}></td>
             <td><img class="qr" src="" data-code="${x.code}" /></td>
             <td>${escapeHtml(x.name)}<div class="muted">${escapeHtml(x.note||'')}</div></td>
-            <td>${escapeHtml(x.address||'')}</td>
-            <td>${escapeHtml(x.officer||'')}</td>
+            <td class="hide-sm">${escapeHtml(x.address||'')}</td>
+            <td class="hide-sm">${escapeHtml(x.officer||'')}</td>
             <td>${escapeHtml(x.branch||'')}</td>
             <td class="code">${escapeHtml(x.customerCode||'')}</td>
-            <td>${escapeHtml(x.phone||'')}</td>
-            <td>${escapeHtml(x.cccd||'')}</td>
-            <td><a class="code" href="${x.mapsUrl}" target="_blank">Mở</a></td>
-            <td class="code">${x.code}</td>
+            <td class="hide-sm">${escapeHtml(x.phone||'')}</td>
+            <td class="hide-sm">${escapeHtml(x.cccd||'')}</td>
+            <td class="hide-sm"><a class="code" href="${x.mapsUrl}" target="_blank">Mở</a></td>
+            <td class="code hide-sm">${x.code}</td>
             <td class="inline-btns">
               <button data-act="print-qr" data-code="${x.code}">In QR</button>
-              <span class="sep">|</span>
+              <span class="sep hide-sm">|</span>
               <button data-act="print-full" data-code="${x.code}">In đầy đủ</button>
-              <span class="sep">|</span>
-              <button data-act="download" data-url="${escapeHtml(x.mapsUrl)}" data-code="${x.code}">Tải QR</button>
-              <span class="sep">|</span>
-              <button data-act="edit" data-id="${x.id}">Sửa</button>
-              <span class="sep">|</span>
+              <span class="sep hide-sm">|</span>
+              <button class="hide-sm" data-act="download" data-url="${escapeHtml(x.mapsUrl)}" data-code="${x.code}">Tải QR</button>
+              <span class="sep hide-sm">|</span>
+              <button class="hide-sm" data-act="edit" data-id="${x.id}">Sửa</button>
+              <span class="sep hide-sm">|</span>
               <button class="btn-danger" data-act="delete" data-id="${x.id}">Xóa</button>
             </td>
           </tr>`).join('')}
       </tbody>
-    </table>`;
+    </table>
+    </div>`;
   const imgs=wrap.querySelectorAll('img.qr');
-  imgs.forEach(async img=>{ const code=img.getAttribute('data-code'); const it=items.find(x=>x.code===code); if(!it) return; try{ img.src=await makeQRDataUrl(it.mapsUrl,256); }catch{ setTimeout(async()=>{ try{ img.src=await makeQRDataUrl(it.mapsUrl,256);}catch{} },2500); } });
+  imgs.forEach(async img=>{ const code=img.getAttribute('data-code'); const it=items.find(x=>x.code===code); if(!it) return; try{ img.src=await makeQRDataUrl(it.mapsUrl,256); }catch{ setTimeout(async()=>{ try{ img.src=await makeQRDataUrl(it.mapsUrl,256);}catch{} },1200); } });
   const selAll=document.getElementById('selAll'); selAll.addEventListener('change',()=>{ if(selAll.checked){ arr.forEach(x=>selectedIds.add(x.id)); } else { arr.forEach(x=>selectedIds.delete(x.id)); } renderTable(); });
   wrap.querySelectorAll('input.sel').forEach(cb=> cb.addEventListener('change',(e)=>{ const id=e.target.getAttribute('data-id'); if(e.target.checked) selectedIds.add(id); else selectedIds.delete(id); }));
   wrap.querySelectorAll('[data-act]').forEach(btn=> btn.addEventListener('click', async (e)=>{
@@ -540,6 +587,7 @@ function renderTable(){
   }));
 }
 
+/* ========= Delete / Edit ========= */
 async function delItem(id){
   const it=items.find(x=>x.id===id); if(!it) return;
   const officer=prompt('Nhập tên Cán bộ đã tạo mục này:')||''; const pin=prompt('Nhập PIN (nếu có):')||'';
@@ -563,7 +611,7 @@ async function editItem(id){
   Object.assign(it,{ name,address,mapsUrl,note,phone,branch,cccd,customerCode }); saveItems(items); renderTable();
 }
 
-// Quick Print
+/* ========= Quick Print ========= */
 document.getElementById('btnQuickPrint')?.addEventListener('click', async ()=>{
   const officer=document.getElementById('officer').value.trim();
   const name=document.getElementById('name').value.trim();
@@ -582,7 +630,7 @@ document.getElementById('btnQuickPrint')?.addEventListener('click', async ()=>{
   win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>In nhãn nhanh – ${escapeHtml(it.name)}</title><style>@page{size:A7;margin:6mm}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0}.label{display:flex;gap:12px;align-items:center;padding:10px}.qr{width:180px;height:180px;object-fit:contain;border:1px solid #eee;border-radius:12px}h1{font-size:20px;margin:0 0 4px}.addr{color:#444}.meta{font-size:12px;color:#555;margin-top:6px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#666;font-size:12px;margin-top:4px}.actions{position:fixed;top:10px;right:10px}@media print{.actions{display:none}}</style></head><body><div class="actions"><button onclick="window.print()">In</button></div><div class="label"><img class="qr" src="${qr}" alt="QR ${escapeHtml(it.name)}"/><div><h1>${escapeHtml(it.name)}</h1><div class="addr">${escapeHtml(it.address||'')}</div><div class="meta">Cán bộ: ${escapeHtml(it.officer||'')} • Chi nhánh: ${escapeHtml(it.branch||'')}</div><div class="meta">Mã KH: ${escapeHtml(it.customerCode||'')} • SĐT: ${escapeHtml(it.phone||'')}</div><div class="meta">CCCD: ${escapeHtml(it.cccd||'')}</div><div class="meta">Ghi chú: ${escapeHtml(it.note||'')}</div><div class="code">Maps: ${escapeHtml(it.mapsUrl)}</div></div></div></body></html>`); win.document.close();
 });
 
-// GitHub commit (SAVE ONLY)
+/* ========= GitHub commit ========= */
 const GH_DEFAULT={ owner:'tvnghp', repo:'QR', branch:'main', path:'data.xlsx' };
 const GH_CFG_KEY='qr_maps_github_cfg_v2'; let ghShaCache=null;
 function readGhCfg(){ const cfg={ message:'Cập nhật data.xlsx từ công cụ QR' }; try{ Object.assign(cfg, JSON.parse(localStorage.getItem(GH_CFG_KEY)||'{}')); }catch{} cfg.token=sessionStorage.getItem('gh_token')||''; return cfg; }
@@ -600,29 +648,31 @@ async function githubSave(){ const cfg=collectGhInputs(); const out=document.get
     const wb=new ExcelJS.Workbook(); const ws=wb.addWorksheet('locations');
     const cols=['id','code','name','address','mapsUrl','createdAt','note','phone','branch','cccd','customerCode','officer','pinSalt','pinHash'];
     ws.columns=cols.map(c=>({header:c,key:c,width: c==='mapsUrl'?60: (c==='address'?40: (c==='name'?30:18))}));
-    ws.addRows(items);
-    ws.views=[{state:'frozen',ySplit:1}];
+    ws.addRows(items); ws.views=[{state:'frozen',ySplit:1}];
     const buf=await wb.xlsx.writeBuffer(); const b64=ab2b64(buf);
     await ghPutFile(cfg,b64);
     out.textContent='✅ Đã commit data.xlsx lên GitHub.';
   }catch(e){ out.textContent='Lỗi: '+e.message; }
 }
 
-// ==== DOMContentLoaded: gắn tất cả listener ====
+/* ========= DOMContentLoaded ========= */
 addEventListener('DOMContentLoaded', () => {
-  // Prefill
   const of=document.getElementById('officer'); if(of) of.value=recall('lastOfficer');
   const pin=document.getElementById('pin'); if(pin) pin.value=recall('lastPin');
 
-  // Form & CRUD
   document.getElementById('btnCreate')?.addEventListener('click', ()=>handleCreate().catch(console.error));
   document.getElementById('btnReset')?.addEventListener('click', ()=>{ for(const id of ['name','branch','address','mapsUrl','phone','customerCode','cccd','note']) document.getElementById(id).value=''; });
   document.getElementById('q')?.addEventListener('input', renderTable);
 
-  // Toolbar actions
   document.getElementById('btnZipSelected')?.addEventListener('click', ()=> zipSelected().catch(console.error));
   document.getElementById('btnPrintA4')?.addEventListener('click', ()=> printA4Selected().catch(console.error));
-  document.getElementById('btnAddDemo')?.addEventListener('click', ()=>{ const officer=(document.getElementById('officer').value||'Demo User').trim()||'Demo User'; const name='Hộ kinh doanh Test '+uid(4).toUpperCase(); const addr='02 Hòa Bình, Ninh Kiều, Cần Thơ'; const item={ id:uid(12), code:'TEST'+uid(4).toUpperCase(), name, address:addr, mapsUrl:mapsUrlFromAddress(addr), createdAt:nowISO(), note:'Dòng test thêm nhanh', phone:'090'+Math.floor(1000000+Math.random()*8999999), branch:'CN Cần Thơ II', cccd:'0'+Math.floor(100000000000+Math.random()*899999999999), customerCode:'KH'+Math.floor(1000+Math.random()*9000), officer, pinSalt:'', pinHash:'' }; items.unshift(item); saveItems(items); renderTable(); });
+  document.getElementById('btnAddDemo')?.addEventListener('click', ()=>{
+    const officer=(document.getElementById('officer').value||'Demo User').trim()||'Demo User';
+    const name='Hộ kinh doanh Test '+uid(4).toUpperCase();
+    const addr='02 Hòa Bình, Ninh Kiều, Cần Thơ';
+    const item={ id:uid(12), code:'TEST'+uid(4).toUpperCase(), name, address:addr, mapsUrl:mapsUrlFromAddress(addr), createdAt:nowISO(), note:'Dòng test thêm nhanh', phone:'090'+Math.floor(1000000+Math.random()*8999999), branch:'CN Cần Thơ II', cccd:'0'+Math.floor(100000000000+Math.random()*899999999999), customerCode:'KH'+Math.floor(1000+Math.random()*9000), officer, pinSalt:'', pinHash:'' };
+    items.unshift(item); saveItems(items); renderTable();
+  });
   document.getElementById('btnClearAll')?.addEventListener('click', ()=>{ if(!confirm('Xóa toàn bộ dữ liệu đang lưu trong trình duyệt?')) return; items=[]; saveItems(items); renderTable(); });
 
   // Map helpers + modal
@@ -661,10 +711,8 @@ addEventListener('DOMContentLoaded', () => {
   // GitHub Save
   document.getElementById('btnGhSave')?.addEventListener('click', ()=> githubSave().catch(console.error));
 
-  // Footer year
+  // Footer year & GH bind
   const yEl=document.getElementById('yearNow'); if(yEl) yEl.textContent=new Date().getFullYear();
-
-  // Bind GH inputs
   bindGhInputs();
 });
 </script>
@@ -679,7 +727,7 @@ addEventListener('DOMContentLoaded', () => {
     </div>
     <div id="map"></div>
     <div class="actions" style="margin-top:10px;">
-      <input id="searchPlace" type="text" placeholder="Tìm địa chỉ (Enter)" style="flex:1; min-width:220px; padding:8px 10px; border:1px solid #ddd; border-radius:10px;" />
+      <input id="searchPlace" type="text" placeholder="Tìm địa chỉ (Enter)" style="flex:1; min-width:180px; padding:10px 10px; border:1px solid #ddd; border-radius:10px;" />
       <button id="btnUseCoords" class="btn-primary" type="button">Dùng tọa độ này</button>
       <button id="btnReverseAddress" class="btn-secondary" type="button">Thử lấy địa chỉ</button>
     </div>
