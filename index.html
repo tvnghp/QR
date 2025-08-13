@@ -61,7 +61,17 @@
   tbody tr:hover{background:#f6f6f6}
 
   .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .qr{width:56px;height:56px;object-fit:contain;border:1px solid var(--border);border-radius:8px;background:#fff}
+  .qr{
+  width:56px; height:56px;
+  object-fit:contain;
+  border:1px solid var(--border);
+  border-radius:0;            /* ← không bo góc thumbnail */
+  background:#fff;
+  image-rendering: pixelated; /* ← giữ ô QR sắc, dễ quét */
+}
+@media (min-width:720px){
+  .qr{ width:64px; height:64px; }
+}
   .empty{color:#777;font-style:italic;padding:12px}
   a{color:var(--primary);text-decoration:none}
   .muted{color:var(--muted);font-size:12px}
@@ -405,27 +415,55 @@ async function printA4Selected(){
 }
 
 /* ========= QR helpers ========= */
-async function makeQRDataUrl(text,size=512){
+async function makeQRDataUrl(text, size = 512){
   try{ await ensureQRCode(); }catch(e){}
-  let lastErr=null;
-  for(let i=0;i<3;i++){
+  let lastErr = null;
+
+  for (let i=0; i<3; i++){
     try{
-      if(typeof QRCode==='undefined') throw new Error('QRCode chưa sẵn sàng');
-      const canvas=document.createElement('canvas');
-      await new Promise((resolve,reject)=>{ QRCode.toCanvas(canvas,text,{width:size,margin:1,errorCorrectionLevel:'H'},err=>err?reject(err):resolve()); });
-      try{
-        const img=await loadLogo();
-        if(img){
-          const ctx=canvas.getContext('2d'); const logoSize=Math.round(size*QR_LOGO.sizeRatio); const pad=Math.round(size*QR_LOGO.paddingRatio);
-          const dx=Math.round((size-logoSize)/2); const dy=Math.round((size-logoSize)/2);
-          ctx.save(); ctx.fillStyle='#fff'; drawRoundedRect(ctx, dx-pad, dy-pad, logoSize+2*pad, logoSize+2*pad, QR_LOGO.rounded); ctx.fill(); ctx.restore();
-          ctx.drawImage(img,dx,dy,logoSize,logoSize);
+      if (typeof QRCode === 'undefined') throw new Error('QRCode chưa sẵn sàng');
+
+      const canvas = document.createElement('canvas');
+
+      // Viền trắng dày hơn để chịu được bo/scale của trình duyệt
+      await new Promise((resolve, reject)=>{
+        QRCode.toCanvas(
+          canvas, text,
+          { width: size, margin: 4, errorCorrectionLevel: 'H' },
+          err => err ? reject(err) : resolve()
+        );
+      });
+
+      // ---- Logo: chỉ chèn khi ảnh đủ lớn (in/tải), KHÔNG chèn cho thumbnail ----
+      const useLogo = QR_LOGO.enabled && size >= 300;
+      if (useLogo){
+        const img = await loadLogo();
+        if (img){
+          const ctx = canvas.getContext('2d');
+          const logoSize = Math.round(size * 0.18);   // nhỏ hơn để an toàn
+          const pad      = Math.round(size * 0.04);
+          const dx = Math.round((size - logoSize)/2);
+          const dy = Math.round((size - logoSize)/2);
+
+          // bo nhẹ nền logo (vẽ đúng tâm, không đè góc finder)
+          ctx.save();
+          ctx.fillStyle = '#fff';
+          roundRect(ctx, dx - pad, dy - pad, logoSize + 2*pad, logoSize + 2*pad, 10);
+          ctx.fill();
+          ctx.restore();
+
+          ctx.drawImage(img, dx, dy, logoSize, logoSize);
         }
-      }catch{}
+      }
+      // ------------------------------------------------------------------------
+
       return canvas.toDataURL('image/png');
-    }catch(err){ lastErr=err; await sleep(2000); }
+    }catch(err){
+      lastErr = err;
+      await sleep(800);
+    }
   }
-  throw lastErr||new Error('Không tạo được QR');
+  throw lastErr || new Error('Không tạo được QR');
 }
 async function downloadQR(url,filename){
   try{ const a=document.createElement('a'); a.href=await makeQRDataUrl(url,1024); a.download=filename||'qr.png'; a.click(); }
@@ -574,7 +612,7 @@ function renderTable(){
     </table>
     </div>`;
   const imgs=wrap.querySelectorAll('img.qr');
-  imgs.forEach(async img=>{ const code=img.getAttribute('data-code'); const it=items.find(x=>x.code===code); if(!it) return; try{ img.src=await makeQRDataUrl(it.mapsUrl,256); }catch{ setTimeout(async()=>{ try{ img.src=await makeQRDataUrl(it.mapsUrl,256);}catch{} },1200); } });
+  imgs.forEach(async img=>{ const code=img.getAttribute('data-code'); const it=items.find(x=>x.code===code); if(!it) return; try{ img.src=await makeQRDataUrl(it.mapsUrl,320); }catch{ setTimeout(async()=>{ try{ img.src=await makeQRDataUrl(it.mapsUrl,256);}catch{} },1200); } });
   const selAll=document.getElementById('selAll'); selAll.addEventListener('change',()=>{ if(selAll.checked){ arr.forEach(x=>selectedIds.add(x.id)); } else { arr.forEach(x=>selectedIds.delete(x.id)); } renderTable(); });
   wrap.querySelectorAll('input.sel').forEach(cb=> cb.addEventListener('change',(e)=>{ const id=e.target.getAttribute('data-id'); if(e.target.checked) selectedIds.add(id); else selectedIds.delete(id); }));
   wrap.querySelectorAll('[data-act]').forEach(btn=> btn.addEventListener('click', async (e)=>{
