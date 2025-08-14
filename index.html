@@ -80,6 +80,10 @@
   th,td{padding:12px 12px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;vertical-align:top;white-space:nowrap}
   tbody tr:nth-child(even){background:#fefefe}
   tbody tr:hover{background:linear-gradient(90deg, #FFF5F5, #FFF8F8);transform:scale(1.01);transition:all 0.2s ease}
+  /* Địa chỉ trong LIST: xuống nhiều dòng nhưng không vượt quá chiều cao QR */
+  .addr-wrap{white-space:normal;line-height:1.35;max-height:96px;overflow-y:auto;overflow-x:hidden;word-break:break-word;overflow-wrap:anywhere;width:100%}
+  /* Ưu tiên độ rộng nhiều hơn cho cột Địa chỉ để chữ không bị bó hẹp */
+  th.addr-col, td.addr-col{width:clamp(280px,32%,520px);min-width:280px}
 
   .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   .qr{
@@ -227,6 +231,8 @@
     
     /* QR code mobile optimization */
     .qr { width: 48px; height: 48px; }
+    /* Giới hạn chiều cao địa chỉ theo chiều cao QR trên mobile */
+    .addr-wrap{max-height:48px}
     
     /* Modal mobile optimization */
     .modal .content { 
@@ -858,7 +864,7 @@ function renderTable(){
         <th><input type="checkbox" id="selAll" title="Chọn/Bỏ chọn tất cả"></th>
         <th>QR</th>
         <th>Tên</th>
-        <th class="hide-sm">Địa chỉ</th>
+        <th class="addr-col hide-sm">Địa chỉ</th>
         <th class="hide-sm">Cán bộ</th>
         <th>Chi nhánh</th>
         <th>Mã KH</th>
@@ -874,7 +880,7 @@ function renderTable(){
             <td><input type="checkbox" class="sel" data-id="${x.id}" ${selectedIds.has(x.id)?'checked':''}></td>
             <td><img class="qr" src="" data-code="${x.code}" /></td>
             <td>${escapeHtml(x.name)}<div class="muted">${escapeHtml(x.note||'')}</div></td>
-            <td class="hide-sm">${escapeHtml(x.address||'')}</td>
+            <td class="addr-col hide-sm"><div class="addr-wrap">${escapeHtml(x.address||'')}</div></td>
             <td class="hide-sm">${escapeHtml(x.officer||'')}</td>
             <td>${escapeHtml(x.branch||'')}</td>
             <td class="code">${escapeHtml(x.customerCode||'')}</td>
