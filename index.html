@@ -2,37 +2,53 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Agribank Chi nhánh Cần Thơ II • Công cụ QR địa chỉ</title>
   <link rel="icon" href="agribank-logo.png" type="image/png">
   <link rel="apple-touch-icon" href="agribank-logo.png">
   <style>
   :root{
-    --primary:#7a001f; --primary-600:#5f0017; --accent:#c2a65c;
-    --bg:#ffffff; --text:#1f1f1f; --muted:#666; --border:#e8e8e8; --thead-bg:#f7eef1;
+    --primary:#8B0000; --primary-600:#660000; --primary-400:#A52A2A; --primary-200:#CD5C5C;
+    --accent:#DAA520; --accent-light:#F0E68C;
+    --bg:#ffffff; --text:#1f1f1f; --muted:#666; --border:#e8e8e8; --thead-bg:#FFF5F5;
+    --success:#228B22; --warning:#FF8C00; --danger:#DC143C;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:var(--text)}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(135deg, #fff, #FFF5F5);color:var(--text);min-height:100vh}
   body.no-scroll{overflow:hidden}
+  
+  /* Scrollbar tùy chỉnh */
+  ::-webkit-scrollbar { width: 12px; height: 12px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb { background: var(--primary-200); border-radius: 6px; border: 2px solid #f1f1f1; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary-400); }
 
-  /* Header */
-  header.hero{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:2px solid var(--primary);background:#fff}
-  header.hero .logo{height:40px;width:40px;object-fit:contain}
-  header.hero .title{flex:1;text-align:center}
-  header.hero h1{margin:0;font-size:20px;line-height:1.1;letter-spacing:.6px;text-transform:uppercase;color:var(--primary)}
-  header.hero h3{margin:2px 0 0;font-size:18px;line-height:1.1;font-weight:800;color:var(--primary);letter-spacing:.9px;text-transform:uppercase}
-  header.hero .ghost{width:40px;height:40px}
+    /* Header */
+      header.hero{display:flex;align-items:center;justify-content:center;padding:12px 20px;border-bottom:3px solid var(--primary);background:linear-gradient(135deg, #fff, #FFF5F5);box-shadow:0 2px 15px rgba(139,0,0,0.1)}
+  header.hero .logo{height:64px;width:64px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));display:flex;align-items:center;justify-content:center}
+  header.hero .title{text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:64px}
+  header.hero h1{margin:0;font-size:22px;line-height:1.1;letter-spacing:.8px;text-transform:uppercase;color:var(--primary);text-shadow:0 1px 2px rgba(0,0,0,0.1)}
+  header.hero h3{margin:4px 0 0;font-size:20px;line-height:1.1;font-weight:800;color:var(--primary);letter-spacing:1px;text-transform:uppercase;text-shadow:0 1px 2px rgba(0,0,0,0.1)}
+  header.hero .ghost{width:48px;height:48px}
 
   main{max-width:1100px;margin:20px auto;padding:0 16px}
 
-  .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 4px 20px rgba(139,0,0,0.08);transition:all 0.3s ease;border-left:4px solid var(--primary)}
+  .card:hover{box-shadow:0 6px 25px rgba(139,0,0,0.12);transform:translateY(-2px)}
+  .card h2{color:var(--primary);margin-top:0;margin-bottom:16px;font-size:20px;font-weight:700;border-bottom:2px solid var(--accent);padding-bottom:8px}
 
   label{display:block;font-weight:600;margin:8px 0 6px}
   input[type="text"],input[type="password"],input[type="url"],textarea{
-    width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:16px;min-height:44px
+    width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-size:16px;min-height:48px;
+    transition:all 0.3s ease;background:#fff;
+    -webkit-appearance:none;appearance:none;touch-action:manipulation
   }
-  input:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(122,0,31,.12)}
+  input:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(139,0,0,0.15);transform:translateY(-1px)}
+  input:hover,textarea:hover{border-color:var(--primary-200)}
 
   .grid{display:grid;gap:12px}
   .grid.cols-3{grid-template-columns:repeat(3,1fr)}
@@ -40,25 +56,30 @@
 
   .actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
   button{
-    cursor:pointer;border:0;padding:12px 14px;border-radius:10px;font-weight:700;letter-spacing:.2px;min-height:44px;
-    -webkit-tap-highlight-color:transparent
+    cursor:pointer;border:0;padding:14px 18px;border-radius:12px;font-weight:700;letter-spacing:.3px;min-height:48px;
+    -webkit-tap-highlight-color:transparent;transition:all 0.3s ease;font-size:15px;position:relative;overflow:hidden;
+    -webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;
+    touch-action:manipulation
   }
-  .btn-primary{background:var(--primary);color:#fff}
-  .btn-primary:hover{background:var(--primary-600)}
-  .btn-secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
-  .btn-secondary:hover{background:#faf4f6}
-  .btn-danger{background:#b42318;color:#fff}
+  button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.5s}
+  button:hover::before{left:100%}
+  .btn-primary{background:linear-gradient(135deg, var(--primary), var(--primary-600));color:#fff;box-shadow:0 4px 15px rgba(139,0,0,0.3)}
+  .btn-primary:hover{background:linear-gradient(135deg, var(--primary-600), var(--primary));box-shadow:0 6px 20px rgba(139,0,0,0.4);transform:translateY(-2px)}
+  .btn-secondary{background:#fff;color:var(--primary);border:2px solid var(--primary);box-shadow:0 2px 10px rgba(139,0,0,0.1)}
+  .btn-secondary:hover{background:var(--primary);color:#fff;box-shadow:0 4px 15px rgba(139,0,0,0.2);transform:translateY(-1px)}
+  .btn-danger{background:linear-gradient(135deg, var(--danger), #B22222);color:#fff;box-shadow:0 4px 15px rgba(220,20,60,0.3)}
+  .btn-danger:hover{background:linear-gradient(135deg, #B22222, var(--danger));box-shadow:0 6px 20px rgba(220,20,60,0.4);transform:translateY(-2px)}
 
   .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
   .toolbar .spacer{flex:1}
 
   /* Bảng + wrapper kéo ngang trên mobile */
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;border:1px solid var(--border);background:#fff}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:16px;border:2px solid var(--border);background:#fff;box-shadow:0 4px 20px rgba(139,0,0,0.08)}
   table{width:100%;border-collapse:separate;border-spacing:0}
-  thead th{background:var(--thead-bg);color:var(--primary);font-weight:700;position:sticky;top:0;z-index:1}
-  th,td{padding:10px 10px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;vertical-align:top;white-space:nowrap}
-  tbody tr:nth-child(even){background:#fbfbfb}
-  tbody tr:hover{background:#f6f6f6}
+  thead th{background:linear-gradient(135deg, var(--thead-bg), #FFF8F8);color:var(--primary);font-weight:700;position:sticky;top:0;z-index:1;padding:14px 12px;font-size:14px;border-bottom:2px solid var(--primary-200)}
+  th,td{padding:12px 12px;border-bottom:1px solid var(--border);text-align:left;font-size:14px;vertical-align:top;white-space:nowrap}
+  tbody tr:nth-child(even){background:#fefefe}
+  tbody tr:hover{background:linear-gradient(90deg, #FFF5F5, #FFF8F8);transform:scale(1.01);transition:all 0.2s ease}
 
   .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   .qr{
@@ -78,17 +99,36 @@
   .inline-btns button{padding:8px 10px;border-radius:8px}
   .inline-btns .sep{color:#bbb}
 
-  .tip{background:#fff7e6;border:1px solid #ffe7ba;padding:10px 12px;border-radius:10px;color:#7a4b00}
+  .tip{background:linear-gradient(135deg, #FFF8DC, #F0E68C);border:2px solid var(--accent);padding:12px 16px;border-radius:12px;color:#8B4513;box-shadow:0 2px 10px rgba(218,165,32,0.2)}
   #qrStatus{display:none;align-items:center;gap:8px;margin:8px 0}
   #qrStatus.show{display:flex}
+  
+  /* Hiệu ứng đẹp cho QR */
+  .qr{transition:all 0.3s ease;border:2px solid var(--border)}
+  .qr:hover{transform:scale(1.05);border-color:var(--primary);box-shadow:0 4px 15px rgba(139,0,0,0.2)}
+  
+  /* Cải thiện toolbar */
+  .toolbar{background:linear-gradient(135deg, #fff, #FFF5F5);padding:16px;border-radius:12px;border:1px solid var(--border);margin-bottom:16px;box-shadow:0 2px 10px rgba(139,0,0,0.05)}
+  
+  /* Cải thiện GitHub section */
+  .gh-wrap{background:linear-gradient(135deg, #f8f9fa, #e9ecef);padding:16px;border-radius:12px;border:1px solid var(--border)}
+  .gh-badge{background:linear-gradient(135deg, #fff, #f8f9fa);border:2px solid var(--primary-200)}
 
   /* Footer */
-  .site-footer{margin-top:28px;background:var(--primary);color:#fff}
-  .site-footer .inner{max-width:1100px;margin:0 auto;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-  .site-footer .copy{display:flex;flex-direction:column;gap:4px}
-  .site-footer .line1{font-weight:600;letter-spacing:.2px}
-  .site-footer .line2{font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:.6px}
-  .site-footer a{color:#fff;text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.6)}
+  .site-footer{margin-top:28px;background:var(--primary-600);color:#fff;box-shadow:0 -4px 20px rgba(102,0,0,0.2)}
+  .site-footer .inner{max-width:1100px;margin:0 auto;padding:20px 16px;display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .site-footer .copy{display:flex;flex-direction:row;gap:20px;align-items:center;flex:1}
+  .site-footer .footer-logo{text-align:center;flex-shrink:0;display:flex;align-items:center}
+  .site-footer .footer-logo-img{height:48px;width:48px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))}
+  .site-footer .copyright-text{display:flex;flex-direction:column;gap:8px;flex:1;justify-content:center}
+  .site-footer .line1{font-weight:600;letter-spacing:.3px;font-size:15px;line-height:1.3}
+  .site-footer .line2{font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:.8px;font-size:13px;line-height:1.2}
+  .site-footer .contact{display:flex;flex-direction:column;gap:4px;text-align:right;min-width:280px}
+  .site-footer .contact-title{font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:.8px;font-size:12px;margin-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.3);padding-bottom:4px}
+  .site-footer .contact-info{font-size:13px;line-height:1.4;color:rgba(255,255,255,0.9)}
+  .site-footer .contact-info strong{color:#fff;font-weight:600}
+  .site-footer a{color:#fff;text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.6);transition:all 0.2s ease}
+  .site-footer a:hover{color:var(--accent);border-bottom-color:var(--accent)}
 
   /* Modal bản đồ */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9999}
@@ -102,19 +142,249 @@
   .gh-badge svg{width:30px;height:30px;fill:var(--primary)}
   .gh-body{flex:1}
 
-  /* Mobile tweaks */
-  header.hero .title h1, header.hero .title h3{white-space:nowrap}
-  @media (max-width:900px){ .grid.cols-3{grid-template-columns:1fr} }
-  @media (max-width:720px){
-    header.hero{flex-direction:column;text-align:center}
-    header.hero .ghost{display:none}
-    header.hero .title h1, header.hero .title h3{white-space:normal}
-    .toolbar{position:sticky;top:0;background:#fff;padding:8px 0;margin-bottom:8px;z-index:50;border-bottom:1px solid #eee}
-    .actions button{flex:1}
-    .qr{width:48px;height:48px}
-    th.hide-sm, td.hide-sm{display:none}
-    .modal .content{width:100vw;height:100vh;border-radius:0;padding:10px}
+  /* Mobile-first responsive design */
+  @media (max-width: 1200px) {
+    main { max-width: 95%; padding: 0 12px; }
+    .site-footer .inner { max-width: 95%; }
   }
+  
+  @media (max-width: 900px) { 
+    .grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid.cols-2 { grid-template-columns: 1fr; }
+    .actions { flex-direction: column; }
+    .actions button { width: 100%; }
+    .toolbar { flex-direction: column; gap: 12px; }
+    .toolbar input[type="text"] { width: 100%; min-width: auto; }
+    .toolbar .spacer { display: none; }
+  }
+  
+  @media (max-width: 720px) {
+    /* Header mobile optimization */
+    header.hero { 
+      flex-direction: column; 
+      text-align: center; 
+      padding: 16px 12px; 
+      gap: 12px;
+    }
+    header.hero .ghost { display: none; }
+    header.hero .title h1, header.hero .title h3 { white-space: normal; }
+    header.hero .title h1 { font-size: 18px; line-height: 1.2; }
+    header.hero .title h3 { font-size: 16px; line-height: 1.2; }
+    header.hero .logo { height: 48px; width: 48px; }
+    
+    /* Main content mobile optimization */
+    main { margin: 16px auto; padding: 0 12px; }
+    .card { padding: 16px; margin-bottom: 16px; border-radius: 12px; }
+    .card h2 { font-size: 18px; margin-bottom: 12px; }
+    
+    /* Grid mobile optimization */
+    .grid.cols-3 { grid-template-columns: 1fr; }
+    .grid.cols-2 { grid-template-columns: 1fr; }
+    
+    /* Form elements mobile optimization */
+    input[type="text"], input[type="password"], input[type="url"], textarea {
+      padding: 12px 14px; 
+      font-size: 16px; /* Prevents zoom on iOS */
+      min-height: 44px; /* Better touch target */
+    }
+    
+    /* Buttons mobile optimization */
+    .actions { flex-direction: column; gap: 8px; }
+    .actions button { 
+      width: 100%; 
+      font-size: 16px; 
+      padding: 14px 16px; 
+      min-height: 48px; /* Better touch target */
+    }
+    
+    /* Toolbar mobile optimization */
+    .toolbar { 
+      position: sticky; 
+      top: 0; 
+      background: #fff; 
+      padding: 12px; 
+      margin-bottom: 12px; 
+      z-index: 50; 
+      border-bottom: 2px solid var(--primary-200);
+      flex-direction: column;
+      gap: 12px;
+    }
+    .toolbar input[type="text"] { 
+      width: 100%; 
+      min-width: auto; 
+      font-size: 16px;
+    }
+    .toolbar .spacer { display: none; }
+    
+    /* Table mobile optimization */
+    .table-wrap { border-radius: 12px; }
+    th.hide-sm, td.hide-sm { display: none; }
+    th, td { 
+      padding: 10px 8px; 
+      font-size: 13px; 
+      white-space: normal; 
+    }
+    
+    /* QR code mobile optimization */
+    .qr { width: 48px; height: 48px; }
+    
+    /* Modal mobile optimization */
+    .modal .content { 
+      width: 100vw; 
+      height: 100vh; 
+      border-radius: 0; 
+      padding: 10px; 
+    }
+    
+                   /* Footer mobile optimization */
+      .site-footer .footer-logo { 
+        margin-bottom: 8px; 
+      }
+      .site-footer .footer-logo-img { 
+        height: 36px; 
+        width: 36px; 
+      }
+     .site-footer .contact { 
+       text-align: center; 
+       min-width: auto; 
+       margin: 16px 0; 
+     }
+    .site-footer .inner { 
+      flex-direction: column; 
+      text-align: center; 
+      gap: 16px; 
+      padding: 16px 12px;
+    }
+    .site-footer .contact-info { font-size: 12px; }
+    
+    /* GitHub section mobile optimization */
+    .gh-wrap { flex-direction: column; gap: 16px; }
+    .gh-badge { width: 48px; height: 48px; }
+    .gh-badge svg { width: 24px; height: 24px; }
+  }
+  
+  @media (max-width: 480px) {
+    /* Extra small screens */
+    header.hero { padding: 12px 8px; }
+    header.hero .title h1 { font-size: 16px; }
+    header.hero .title h3 { font-size: 14px; }
+    
+    main { padding: 0 8px; }
+    .card { padding: 12px; }
+    
+    input[type="text"], input[type="password"], input[type="url"], textarea {
+      padding: 10px 12px;
+      font-size: 16px;
+    }
+    
+    .actions button { 
+      padding: 12px 14px; 
+      font-size: 15px; 
+    }
+    
+                   .site-footer .inner { padding: 16px 8px; }
+      .site-footer .footer-logo-img { height: 32px; width: 32px; }
+      .site-footer .contact-info { font-size: 11px; }
+  }
+  
+  /* Touch-friendly improvements */
+  @media (hover: none) and (pointer: coarse) {
+    button, input, .qr, .gh-badge {
+      -webkit-tap-highlight-color: rgba(139, 0, 0, 0.1);
+    }
+    
+    .card:hover { transform: none; }
+    .qr:hover { transform: none; }
+    
+    /* Larger touch targets for mobile */
+    .gh-badge { min-width: 48px; min-height: 48px; }
+    .qr { min-width: 48px; min-height: 48px; }
+    
+    /* Better touch scrolling */
+    .table-wrap {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    /* Prevent text selection on buttons */
+    button {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  }
+  
+  /* Mobile-specific improvements */
+  @media (max-width: 720px) {
+    /* Better mobile spacing */
+    .card + .card { margin-top: 16px; }
+    
+    /* Mobile-friendly table */
+    .table-wrap {
+      margin: 0 -12px;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+    
+    /* Mobile-friendly buttons in actions */
+    .actions .btn-secondary {
+      background: #f8f9fa;
+      border-color: var(--primary-200);
+      color: var(--primary-600);
+    }
+    
+    /* Mobile-friendly input focus */
+    input:focus, textarea:focus {
+      box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.2);
+      transform: none;
+    }
+    
+    /* Mobile-friendly card shadows */
+    .card {
+      box-shadow: 0 2px 12px rgba(139, 0, 0, 0.1);
+    }
+    
+    /* Mobile-friendly footer */
+    .site-footer {
+      margin-top: 20px;
+    }
+  }
+  
+  /* Mobile keyboard optimization */
+  @media (max-height: 600px) and (orientation: landscape) {
+    header.hero { padding: 8px 16px; }
+    header.hero .title h1 { font-size: 14px; }
+    header.hero .title h3 { font-size: 12px; }
+    main { margin: 12px auto; }
+    .card { padding: 12px; margin-bottom: 12px; }
+  }
+  
+  /* Landscape mobile optimization */
+  @media (max-width: 900px) and (orientation: landscape) {
+    header.hero { flex-direction: row; padding: 12px 16px; }
+    header.hero .title h1 { font-size: 16px; }
+    header.hero .title h3 { font-size: 14px; }
+    
+    .grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+    .actions { flex-direction: row; flex-wrap: wrap; }
+    .actions button { flex: 1; min-width: 120px; }
+  }
+  
+  /* Animation cho các card */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .card { animation: fadeInUp 0.6s ease-out; }
+  
+  /* Hiệu ứng loading cho button */
+  .btn-loading { position: relative; color: transparent !important; }
+  .btn-loading::after { content: ''; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite; }
+  
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
   <!-- Leaflet CSS & vendor -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -248,12 +518,25 @@
   <footer class="site-footer">
     <div class="inner">
       <div class="copy">
-        <div class="line1">Bản quyền © <span id="yearNow"></span> <b>AGRIBANK</b> — Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam</div>
-        <div class="line2">CHI NHÁNH CẦN THƠ II • All rights reserved.</div>
+                 <div class="footer-logo">
+           <a href="https://www.agribank.com.vn" target="_blank" rel="noopener">
+             <img src="agribank-logo.png" alt="Agribank Logo" class="footer-logo-img">
+           </a>
+         </div>
+        <div class="copyright-text">
+          <div class="line1">Bản quyền © <span id="yearNow"></span> <b>AGRIBANK</b> — Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam</div>
+          <div class="line2">CHI NHÁNH CẦN THƠ II • All rights reserved.</div>
+        </div>
       </div>
-      <div class="right">
-        <a href="https://www.agribank.com.vn" target="_blank" rel="noopener">agribank.com.vn</a>
+      <div class="contact">
+        <div class="contact-title">Liên hệ</div>
+        <div class="contact-info">
+          <strong>Nguyễn Thành Trung</strong><br>
+          📱 <strong>Cellphone:</strong> 0947.86.86.82<br>
+          📧 <strong>Email:</strong> trungnguyenthanh1@agribank.com.vn
+        </div>
       </div>
+             
     </div>
   </footer>
 
