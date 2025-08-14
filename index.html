@@ -17,8 +17,8 @@
     --success:#228B22; --warning:#FF8C00; --danger:#DC143C;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(135deg, #fff, #FFF5F5);color:var(--text);min-height:100vh}
+  html{height:100%; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
+  body{height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(135deg, #fff, #FFF5F5);color:var(--text);min-height:100vh}
   body.no-scroll{overflow:hidden}
   
   /* Scrollbar tùy chỉnh */
@@ -218,7 +218,7 @@
     /* Toolbar mobile optimization */
     .toolbar { 
       position: sticky; 
-      top: 0; 
+      top: calc(env(safe-area-inset-top, 0px)); 
       background: #fff; 
       padding: 12px; 
       margin-bottom: 12px; 
