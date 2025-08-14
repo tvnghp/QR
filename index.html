@@ -106,6 +106,8 @@
   .inline-btns .sep{color:#bbb}
 
   .tip{background:linear-gradient(135deg, #FFF8DC, #F0E68C);border:2px solid var(--accent);padding:12px 16px;border-radius:12px;color:#8B4513;box-shadow:0 2px 10px rgba(218,165,32,0.2)}
+  /* Tip toàn bề ngang card (full khung) */
+  .tip-wide{display:block;margin:12px -20px -20px;-webkit-margin-start:-20px;-webkit-margin-end:-20px;border-radius:0 0 12px 12px}
   #qrStatus{display:none;align-items:center;gap:8px;margin:8px 0}
   #qrStatus.show{display:flex}
   
@@ -115,6 +117,14 @@
   
   /* Cải thiện toolbar */
   .toolbar{background:linear-gradient(135deg, #fff, #FFF5F5);padding:16px;border-radius:12px;border:1px solid var(--border);margin-bottom:16px;box-shadow:0 2px 10px rgba(139,0,0,0.05)}
+  /* Tiêu đề trong toolbar chiếm trọn dòng để gạch chân kéo full khung */
+  .toolbar h2{flex:1 0 100%; width:100%}
+  /* Sắp xếp gọn 3 nút map để tận dụng ngang */
+  .map-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+  @media (max-width: 900px){ .map-actions{grid-template-columns:repeat(2,1fr)} }
+  @media (max-width: 720px){ .map-actions{grid-template-columns:1fr} }
+  /* Cho phép một ô trong lưới span toàn hàng để tận dụng khoảng trống hai bên */
+  .col-span-2{grid-column:1 / -1}
   
   /* Cải thiện GitHub section */
   .gh-wrap{background:linear-gradient(135deg, #f8f9fa, #e9ecef);padding:16px;border-radius:12px;border:1px solid var(--border)}
@@ -182,6 +192,8 @@
     main { margin: 16px auto; padding: 0 12px; }
     .card { padding: 16px; margin-bottom: 16px; border-radius: 12px; }
     .card h2 { font-size: 18px; margin-bottom: 12px; }
+    /* Toolbar title underline full-width & spacing */
+    .toolbar h2 { width:100%; padding-bottom:6px; margin-bottom:10px; border-bottom:2px solid var(--accent); }
     
     /* Grid mobile optimization */
     .grid.cols-3 { grid-template-columns: 1fr; }
@@ -243,6 +255,8 @@
       border-radius: 0; 
       padding: 10px; 
     }
+    /* Tip wide khớp padding card ở mobile */
+    .tip-wide{ margin-left:-16px; margin-right:-16px }
     
                    /* Footer mobile optimization */
       .site-footer .footer-logo { 
@@ -289,6 +303,7 @@
       padding: 12px 14px; 
       font-size: 15px; 
     }
+    .tip-wide{ margin-left:-12px; margin-right:-12px; font-size:13px; }
     
                    .site-footer .inner { padding: 16px 8px; }
       .site-footer .footer-logo-img { height: 32px; width: 32px; }
@@ -393,6 +408,50 @@
   .btn-loading::after { content: ''; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; margin: -10px 0 0 -10px; border: 2px solid transparent; border-top: 2px solid currentColor; border-radius: 50%; animation: spin 1s linear infinite; }
   
   @keyframes spin { to { transform: rotate(360deg); } }
+  
+  /* Nhấp nháy cảnh báo đỏ cho bảng (đậm, rất dễ thấy) */
+  .flash-danger{ animation: flashDanger 1.2s ease-in-out 3; }
+  .table-wrap.flash-danger{ border-color: var(--danger) !important; }
+  .card.flash-danger{ animation: flashDanger 1.2s ease-in-out 3; }
+  @keyframes flashDanger{
+    0%{
+      background:#fff;
+      box-shadow: none;
+    }
+    35%{
+      background:#ffd6d6; /* đỏ nhạt rõ ràng */
+      box-shadow: inset 0 0 0 4px rgba(220,20,60,.85), 0 0 16px rgba(220,20,60,.65);
+    }
+    70%{
+      background:#fff0f0;
+      box-shadow: inset 0 0 0 3px rgba(220,20,60,.75), 0 0 10px rgba(220,20,60,.55);
+    }
+    100%{
+      background:#fff;
+      box-shadow: none;
+    }
+  }
+  /* Overlay nhấp nháy toàn màn hình để đảm bảo người dùng thấy rõ */
+  .screen-flash{ position:fixed; inset:0; background:rgba(220,20,60,0); pointer-events:none; z-index:999999; animation: screenFlash 1.2s ease-in-out 3; }
+  @keyframes screenFlash{
+    0%{ background: rgba(220,20,60,0); }
+    30%{ background: rgba(220,20,60,.35); }
+    60%{ background: rgba(220,20,60,.15); }
+    100%{ background: rgba(220,20,60,0); }
+  }
+
+  /* ===== Modal xác nhận xoá toàn bộ ===== */
+  #clearModal .content{ width:min(480px,96vw); height:auto; padding:16px; }
+  /* Generic confirm layout for modals */
+  .modal .confirm-card{ display:flex; flex-direction:column; gap:12px; }
+  .modal .confirm-card .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
+  .blink-red{ animation: blinkRed 0.9s ease-in-out 2; }
+  .blink-red-infinite{ animation: blinkRed 1.1s ease-in-out infinite; }
+  @keyframes blinkRed{
+    0%{ box-shadow:none; background:#fff; }
+    50%{ box-shadow:0 0 0 3px rgba(220,20,60,.6); background:#FFECEC; }
+    100%{ box-shadow:none; background:#fff; }
+  }
 </style>
   <!-- Leaflet CSS & vendor -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -415,7 +474,7 @@
   <main>
     <section class="card">
       <h2>Thêm địa chỉ</h2>
-      <div id="qrStatus" class="tip"><span>⏳ Đang tải thư viện QR… sẽ tự thử lại nếu mạng chậm.</span></div>
+      <div id="qrStatus" class="tip tip-wide"><span>⏳ Đang tải thư viện QR… sẽ tự thử lại nếu mạng chậm.</span></div>
       <div class="grid cols-3">
         <div>
           <label for="officer">Cán bộ nhập *</label>
@@ -429,14 +488,14 @@
           <label for="name">Tên địa điểm *</label>
           <input id="name" type="text" placeholder="VD: Hộ kinh doanh Nguyễn A" />
         </div>
-        <div>
+        <div class="col-span-2">
           <label for="address">Địa chỉ (nếu không có link) *</label>
           <input id="address" type="text" placeholder="VD: Số 08-10, Nam Kỳ Khởi Nghĩa, Phường Ninh Kiều, TP. Cần Thơ" />
         </div>
-        <div>
+        <div class="col-span-2">
           <label for="mapsUrl">Hoặc dán link Google Maps *</label>
           <input id="mapsUrl" type="text" placeholder="https://maps.app.goo.gl/..." />
-          <div class="actions" style="margin-top:6px; gap:8px;">
+          <div class="map-actions">
             <button id="btnUseCurrent" type="button" class="btn-secondary">📍 Dùng vị trí hiện tại</button>
             <button id="btnPickOnMap" type="button" class="btn-secondary">🗺️ Chọn trên bản đồ</button>
             <button id="btnOpenMaps" type="button" class="btn-secondary">Mở Google Maps</button>
@@ -464,7 +523,7 @@
         </div>
       </div>
       <div class="actions">
-        <button class="btn-primary" id="btnCreate">Tạo mục</button>
+        <button class="btn-secondary" id="btnCreate">Lưu thông tin</button>
         <button class="btn-secondary" id="btnQuickPrint">In QR nhanh</button>
         <button class="btn-secondary" id="btnReset">Xóa form</button>
         <span class="muted">* Bắt buộc</span>
@@ -476,12 +535,12 @@
 
     <section class="card">
       <div class="toolbar">
-        <h2 style="margin:0">Danh sách đã nhập</h2>
+        <h2 style="margin:0;border-bottom:2px solid var(--accent);padding-bottom:4px">Danh sách đã nhập</h2>
         <div class="spacer"></div>
         <input id="q" type="text" placeholder="Tìm theo tên/chi nhánh/mã KH/sđt/cán bộ" style="min-width:220px; padding:10px 10px; border:1px solid #ddd; border-radius:10px;" />
         <button class="btn-secondary" id="btnZipSelected" title="Tải ZIP các QR đã chọn">ZIP QR (đã chọn)</button>
         <button class="btn-secondary" id="btnPrintA4" title="In nhiều tem trên 1 A4 cho các dòng đã chọn">In A4 (đã chọn)</button>
-        <button class="btn-danger" id="btnClearAll" title="Xóa toàn bộ trong trình duyệt (không ảnh hưởng GitHub)">Xóa toàn bộ</button>
+        <button class="btn-secondary" id="btnClearAll" title="Xóa toàn bộ trong trình duyệt (không ảnh hưởng GitHub)">Xóa toàn bộ</button>
         <button class="btn-secondary" id="btnAddDemo" title="Thêm 1 dòng mẫu để thử nhanh">Thêm dòng test</button>
       </div>
       <div id="list"></div>
@@ -921,16 +980,41 @@ function renderTable(){
     if(act==='delete') return delItem(e.currentTarget.getAttribute('data-id'));
   }));
 
-  // Toggle show code by password
+  // Toggle show code via modal with password
   wrap.querySelectorAll('button.toggle-code').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const id=btn.getAttribute('data-id');
       const row=items.find(x=>x.id===id);
       if(!row) return;
-      const ok = prompt('Nhập mã để xem:') === 'Adme@nPC';
-      if(!ok){ alert('Mã không đúng.'); return; }
-      const span=wrap.querySelector(`span.masked[data-id="${id}"]`);
-      if(span){ span.textContent=row.code; }
+      const modal=document.createElement('div');
+      modal.className='modal';
+      modal.innerHTML=`
+        <div class="content blink-red-infinite">
+          <div class="confirm-card">
+            <h3 style="margin:0">Xem mã?</h3>
+            <div class="muted">Nhập mã xác nhận để xem</div>
+            <input id="viewCode" type="password" placeholder="Nhập mã..." style="padding:12px 14px;border:1px solid #ddd;border-radius:10px;">
+            <div class="actions">
+              <button id="viewCancel" class="btn-secondary">Hủy</button>
+              <button id="viewOk" class="btn-primary">Xem</button>
+            </div>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      const close=()=> modal.remove();
+      modal.addEventListener('click',(e)=>{ if(e.target===modal) close(); });
+      modal.querySelector('#viewCancel')?.addEventListener('click', close);
+      modal.querySelector('#viewOk')?.addEventListener('click', ()=>{
+        const code=(document.getElementById('viewCode')?.value||'').trim();
+        if(code!=='Adme@nPC'){
+          const box=modal.querySelector('.content');
+          box?.classList.add('blink-red'); setTimeout(()=> box?.classList.remove('blink-red'), 900);
+          return;
+        }
+        const span=wrap.querySelector(`span.masked[data-id="${id}"]`);
+        if(span){ span.textContent=row.code; }
+        close();
+      });
     });
   });
 }
@@ -1017,10 +1101,45 @@ addEventListener('DOMContentLoaded', () => {
     items.unshift(item); saveItems(items); renderTable();
   });
   document.getElementById('btnClearAll')?.addEventListener('click', ()=>{
-    const code = prompt('Nhập mã xác nhận để xóa toàn bộ:');
-    if (code !== 'Adme@nPC') { alert('Mã xác nhận không đúng.'); return; }
-    if(!confirm('Xóa toàn bộ dữ liệu đang lưu trong trình duyệt?')) return;
-    items=[]; saveItems(items); renderTable();
+    // Tạo modal xác nhận (thay prompt/confirm)
+    const modal=document.createElement('div');
+    modal.className='modal';
+    modal.id='clearModal';
+    modal.innerHTML=`
+      <div class="content blink-red-infinite">
+        <div class="confirm-card">
+          <h3 style="margin:0">Xóa toàn bộ dữ liệu?</h3>
+          <div class="muted">Nhập mã xác nhận để tiếp tục</div>
+          <input id="clearCode" type="password" placeholder="Nhập mã..." style="padding:12px 14px;border:1px solid #ddd;border-radius:10px;">
+          <div class="actions">
+            <button id="clearCancel" class="btn-secondary">Hủy</button>
+            <button id="clearOk" class="btn-danger">Xóa</button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    const close=()=> modal.remove();
+    modal.addEventListener('click',(e)=>{ if(e.target===modal) close(); });
+    modal.querySelector('#clearCancel')?.addEventListener('click', close);
+    modal.querySelector('#clearOk')?.addEventListener('click', ()=>{
+      const code=(document.getElementById('clearCode')?.value||'').trim();
+      if(code!=='Adme@nPC'){
+        const box=modal.querySelector('.content');
+        box?.classList.add('blink-red');
+        setTimeout(()=> box?.classList.remove('blink-red'), 900);
+        return;
+      }
+      const listCard=document.querySelector('main > section.card:nth-of-type(2)');
+      const listWrap=document.querySelector('#list .table-wrap') || document.getElementById('list');
+      if(listWrap) listWrap.classList.add('flash-danger');
+      if(listCard) listCard.classList.add('flash-danger');
+      setTimeout(()=>{
+        if(listWrap) listWrap.classList.remove('flash-danger');
+        if(listCard) listCard.classList.remove('flash-danger');
+        items=[]; saveItems(items); renderTable();
+        close();
+      }, 1200);
+    });
   });
 
   // Map helpers + modal
