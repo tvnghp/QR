@@ -84,6 +84,8 @@
   .addr-wrap{white-space:normal;line-height:1.35;max-height:96px;overflow-y:auto;overflow-x:hidden;word-break:break-word;overflow-wrap:anywhere;width:100%}
   /* Ưu tiên độ rộng nhiều hơn cho cột Địa chỉ để chữ không bị bó hẹp */
   th.addr-col, td.addr-col{width:clamp(280px,32%,520px);min-width:280px}
+  /* Căn giữa cột Link Maps */
+  th.link-col, td.link-col{ text-align:center }
 
   .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   .qr{
@@ -863,6 +865,7 @@ function renderTable(){
       <thead><tr>
         <th><input type="checkbox" id="selAll" title="Chọn/Bỏ chọn tất cả"></th>
         <th>QR</th>
+        <th class="link-col">Link Maps</th>
         <th>Tên</th>
         <th class="addr-col hide-sm">Địa chỉ</th>
         <th class="hide-sm">Cán bộ</th>
@@ -870,7 +873,6 @@ function renderTable(){
         <th>Mã KH</th>
         <th class="hide-sm">SĐT</th>
         <th class="hide-sm">CCCD</th>
-        <th class="hide-sm">Link Maps</th>
         <th class="hide-sm">Mã</th>
         <th>Hành động</th>
       </tr></thead>
@@ -879,6 +881,7 @@ function renderTable(){
           <tr>
             <td><input type="checkbox" class="sel" data-id="${x.id}" ${selectedIds.has(x.id)?'checked':''}></td>
             <td><img class="qr" src="" data-code="${x.code}" /></td>
+            <td class="link-col"><a class="code" href="${x.mapsUrl}" target="_blank">Mở</a></td>
             <td>${escapeHtml(x.name)}<div class="muted">${escapeHtml(x.note||'')}</div></td>
             <td class="addr-col hide-sm"><div class="addr-wrap">${escapeHtml(x.address||'')}</div></td>
             <td class="hide-sm">${escapeHtml(x.officer||'')}</td>
@@ -886,7 +889,6 @@ function renderTable(){
             <td class="code">${escapeHtml(x.customerCode||'')}</td>
             <td class="hide-sm">${escapeHtml(x.phone||'')}</td>
             <td class="hide-sm">${escapeHtml(x.cccd||'')}</td>
-            <td class="hide-sm"><a class="code" href="${x.mapsUrl}" target="_blank">Mở</a></td>
             <td class="code hide-sm">
               <span class="masked" data-id="${x.id}">********</span>
               <button class="toggle-code" data-id="${x.id}" title="Xem mã" style="margin-left:6px;padding:2px 6px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer">👁</button>
