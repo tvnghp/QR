@@ -980,42 +980,47 @@ function renderTable(){
   }));
 
   // Toggle show code via modal with password
-  wrap.querySelectorAll('button.toggle-code').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id=btn.getAttribute('data-id');
-      const row=items.find(x=>x.id===id);
-      if(!row) return;
-      const modal=document.createElement('div');
-      modal.className='modal';
-      modal.innerHTML=`
-        <div class="content blink-red-infinite">
-          <div class="confirm-card">
-            <h3 style="margin:0">Xem mã?</h3>
-            <div class="muted">Nhập mã xác nhận để xem</div>
-            <input id="viewCode" type="password" placeholder="Nhập mã..." style="padding:12px 14px;border:1px solid #ddd;border-radius:10px;">
-            <div class="actions">
-              <button id="viewCancel" class="btn-secondary">Hủy</button>
-              <button id="viewOk" class="btn-primary">Xem</button>
-            </div>
+ // ...existing code...
+// ...existing code...
+wrap.querySelectorAll('button.toggle-code').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const id=btn.getAttribute('data-id');
+    const row=items.find(x=>x.id===id);
+    if(!row) return;
+    // Modal xác nhận nhỏ, có nhấp nháy đỏ
+    const modal=document.createElement('div');
+    modal.className='modal';
+    modal.innerHTML=`
+      <div class="content blink-red-infinite" style="width:min(480px,96vw);height:auto;padding:16px;">
+        <div class="confirm-card">
+          <h3 style="margin:0">Xem mã?</h3>
+          <div class="muted">Nhập mã xác nhận để xem mã này</div>
+          <input id="viewCode" type="password" placeholder="Nhập mã..." style="padding:12px 14px;border:1px solid #ddd;border-radius:10px;">
+          <div class="actions">
+            <button id="viewCancel" class="btn-secondary">Hủy</button>
+            <button id="viewOk" class="btn-primary">Xem</button>
           </div>
-        </div>`;
-      document.body.appendChild(modal);
-      const close=()=> modal.remove();
-      modal.addEventListener('click',(e)=>{ if(e.target===modal) close(); });
-      modal.querySelector('#viewCancel')?.addEventListener('click', close);
-      modal.querySelector('#viewOk')?.addEventListener('click', ()=>{
-        const code=(document.getElementById('viewCode')?.value||'').trim();
-        if(code!=='Adme@nPC'){
-          const box=modal.querySelector('.content');
-          box?.classList.add('blink-red'); setTimeout(()=> box?.classList.remove('blink-red'), 900);
-          return;
-        }
-        const span=wrap.querySelector(`span.masked[data-id="${id}"]`);
-        if(span){ span.textContent=row.code; }
-        close();
-      });
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    const close=()=> modal.remove();
+    modal.addEventListener('click',(e)=>{ if(e.target===modal) close(); });
+    modal.querySelector('#viewCancel')?.addEventListener('click', close);
+    modal.querySelector('#viewOk')?.addEventListener('click', ()=>{
+      const code=(document.getElementById('viewCode')?.value||'').trim();
+      if(code!=='Adme@nPC'){
+        const box=modal.querySelector('.content');
+        box?.classList.add('blink-red');
+        setTimeout(()=> box?.classList.remove('blink-red'), 900);
+        return;
+      }
+      const span=wrap.querySelector(`span.masked[data-id="${id}"]`);
+      if(span){ span.textContent=row.code; }
+      close();
     });
   });
+});
+// ...existing code...
 }
 
 /* ========= Delete / Edit ========= */
