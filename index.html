@@ -490,10 +490,12 @@
         <input id="address" type="text" placeholder="VD: Số 08-10, Nam Kỳ Khởi Nghĩa, phường Ninh Kiều, TP Cần Thơ" />
       </div>
       <!-- Ẩn dòng nhập Link Google Maps, giữ lại các nút vị trí -->
-      <div style="display:none;">
+            <!-- ...existing code... -->
+      <div>
         <label for="mapsUrl">Hoặc dán link Google Maps *</label>
         <input id="mapsUrl" type="text" placeholder="https://maps.app.goo.gl/..." />
       </div>
+      <!-- ...existing code... -->
       <div class="map-actions">
         <button id="btnUseCurrent" type="button" class="btn-secondary">📍 Vị trí hiện tại</button>
         <button id="btnPickOnMap" type="button" class="btn-secondary">🗺️ Chọn trên bản đồ</button>
@@ -664,7 +666,7 @@ function seedDemo(){
 /* ========= CRUD ========= */
 async function handleCreate(){
   const officer=document.getElementById('officer').value.trim();
-  const pin=document.getElementById('pin').value.trim();
+  const pin='123123'; // Đặt mặc định
   const name=document.getElementById('name').value.trim();
   const branch=document.getElementById('branch').value.trim();
   const address=document.getElementById('address').value.trim();
@@ -673,15 +675,16 @@ async function handleCreate(){
   const customerCode=document.getElementById('customerCode').value.trim();
   const cccd=normalizeCCCD(document.getElementById('cccd').value.trim());
   const note=document.getElementById('note').value.trim();
-  if(!officer || !name || !address || !mapsUrlInput) return alert('Vui lòng nhập đầy đủ: Cán bộ nhập, Tên, Địa chỉ và Link Maps.');
+  if(!officer || !name || !address) return alert('Vui lòng nhập đầy đủ: Cán bộ nhập, Tên, Địa chỉ.');
   if(cccd && cccd.length!==12 && !confirm('CCCD không đủ 12 số. Vẫn lưu?')) return;
   const mapsUrl=mapsUrlInput || mapsUrlFromAddress(address);
   const createdAt=nowISO();
-  let pinSalt='',pinHash=''; if(pin){ pinSalt=randomHex(8); pinHash=await sha256Hex(pinSalt+pin); }
+  let pinSalt='',pinHash='';
+  if(pin){ pinSalt=randomHex(8); pinHash=await sha256Hex(pinSalt+pin); }
   const item={ id:uid(12), code:uid(8), name, address, mapsUrl, createdAt, note, phone, branch, cccd, customerCode, officer, pinSalt, pinHash };
   items.unshift(item); saveItems(items); renderTable();
   for(const id of ['name','branch','address','mapsUrl','phone','customerCode','cccd','note']) document.getElementById(id).value='';
-  remember('lastOfficer', officer); if(pin) remember('lastPin', pin);
+  remember('lastOfficer', officer);
   const statusEl=document.getElementById('createStatus');
   if(statusEl){
     statusEl.textContent='Đã lưu thông tin thành công.';
@@ -1067,7 +1070,7 @@ document.getElementById('btnQuickPrint')?.addEventListener('click', async ()=>{
 /* ========= GitHub commit (auto, no UI) ========= */
 const GH_DEFAULT={ owner:'tvnghp', repo:'QR', branch:'main', path:'data.xlsx' };
 let ghShaCache=null;
-const GH_TOKEN='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';
+const GH_TOKEN='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';
 const GH_COMMIT_MESSAGE='Cập nhật data.xlsx từ công cụ QR';
 function ab2b64(buf){ const bytes=new Uint8Array(buf); let bin=''; for(let i=0;i<bytes.length;i++){ bin+=String.fromCharCode(bytes[i]); } return btoa(bin); }
 async function ghRequest(method,url,token,body){ const res=await fetch(url,{method,headers:{'Accept':'application/vnd.github+json','Authorization':'token '+token,'Content-Type':'application/json'},body: body?JSON.stringify(body):undefined}); if(!res.ok){ const txt=await res.text(); throw new Error(`GitHub API ${res.status}: ${txt}`); } return res.json(); }
