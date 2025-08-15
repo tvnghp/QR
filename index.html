@@ -472,35 +472,35 @@
   </header>
 
   <main>
-    <section class="card">
-      <h2>Thêm địa chỉ</h2>
-      <div id="qrStatus" class="tip tip-wide"><span>⏳ Đang tải thư viện QR… sẽ tự thử lại nếu mạng chậm.</span></div>
-      <div class="grid cols-3">
-        <div>
-          <label for="officer">Cán bộ nhập *</label>
-          <input id="officer" type="text" placeholder="VD: Nguyễn Văn B" />
-        </div>
-        <div>
-          <label for="pin">PIN (tùy chọn)</label>
-          <input id="pin" type="password" placeholder="Nhập PIN để khóa sửa/xóa" />
-        </div>
-        <div>
-          <label for="name">Tên địa điểm *</label>
-          <input id="name" type="text" placeholder="VD: Hộ kinh doanh Nguyễn A" />
-        </div>
-        <div class="col-span-2">
-          <label for="address">Địa chỉ (nếu không có link) *</label>
-          <input id="address" type="text" placeholder="VD: Số 08-10, Nam Kỳ Khởi Nghĩa, Phường Ninh Kiều, TP. Cần Thơ" />
-        </div>
-        <div class="col-span-2">
-          <label for="mapsUrl">Hoặc dán link Google Maps *</label>
-          <input id="mapsUrl" type="text" placeholder="https://maps.app.goo.gl/..." />
-          <div class="map-actions">
-            <button id="btnUseCurrent" type="button" class="btn-secondary">📍 Dùng vị trí hiện tại</button>
-            <button id="btnPickOnMap" type="button" class="btn-secondary">🗺️ Chọn trên bản đồ</button>
-            <button id="btnOpenMaps" type="button" class="btn-secondary">Mở Google Maps</button>
-          </div>
-        </div>
+        <!-- Form nhập địa chỉ -->
+    <!-- ...existing code... -->
+  <section class="card">
+    <h2>Thêm địa chỉ</h2>
+    <div class="grid cols-1">
+      <div>
+        <label for="officer">Cán bộ nhập *</label>
+        <input id="officer" type="text" placeholder="VD: Nguyễn Văn B" />
+      </div>
+      <div>
+        <label for="name">Tên địa điểm *</label>
+        <input id="name" type="text" placeholder="VD: Hộ kinh doanh Nguyễn A" />
+      </div>
+      <div>
+        <label for="address">Địa chỉ *</label>
+        <input id="address" type="text" placeholder="VD: Số 08-10, Nam Kỳ Khởi Nghĩa, phường Ninh Kiều, TP Cần Thơ" />
+      </div>
+      <!-- Ẩn dòng nhập Link Google Maps, giữ lại các nút vị trí -->
+      <div style="display:none;">
+        <label for="mapsUrl">Hoặc dán link Google Maps *</label>
+        <input id="mapsUrl" type="text" placeholder="https://maps.app.goo.gl/..." />
+      </div>
+      <div class="map-actions">
+        <button id="btnUseCurrent" type="button" class="btn-secondary">📍 Vị trí hiện tại</button>
+        <button id="btnPickOnMap" type="button" class="btn-secondary">🗺️ Chọn trên bản đồ</button>
+        <button id="btnOpenMaps" type="button" class="btn-secondary">Google Maps</button>
+      </div>
+      <details>
+        <summary>Thêm thông tin</summary>
         <div>
           <label for="phone">Số điện thoại</label>
           <input id="phone" type="text" placeholder="VD: 0987..." />
@@ -511,40 +511,39 @@
         </div>
         <div>
           <label for="customerCode">Mã KH</label>
-          <input id="customerCode" type="text" placeholder="VD: KH00123" />
+          <input id="customerCode" type="text" placeholder="VD: 1890-XXXXXXXXX" />
         </div>
         <div>
           <label for="cccd">CCCD</label>
           <input id="cccd" type="text" placeholder="12 số" />
         </div>
-        <div class="cols-2" style="grid-column: span 2;">
+        <div>
           <label for="note">Ghi chú</label>
           <input id="note" type="text" placeholder="VD: Nhà mặt tiền, giờ mở cửa, người liên hệ..." />
         </div>
-      </div>
-      <div class="actions">
-        <button class="btn-secondary" id="btnCreate">Lưu thông tin</button>
+      </details>
+      <div class="actions" style="margin-top:16px;">
+        <button class="btn-primary" id="btnCreate">Lưu thông tin</button>
         <button class="btn-secondary" id="btnQuickPrint">In QR nhanh</button>
         <button class="btn-secondary" id="btnReset">Xóa form</button>
-        <span class="muted">* Bắt buộc</span>
       </div>
-      <div id="createStatus" class="muted" style="margin-top:6px; display:none; color:#0a0; font-weight:600;"></div>
-    </section>
-
-
-
-    <section class="card">
-      <div class="toolbar">
-        <h2 style="margin:0;border-bottom:2px solid var(--accent);padding-bottom:4px">Danh sách đã nhập</h2>
-        <div class="spacer"></div>
-        <input id="q" type="text" placeholder="Tìm theo tên/chi nhánh/mã KH/sđt/cán bộ" style="min-width:220px; padding:10px 10px; border:1px solid #ddd; border-radius:10px;" />
-        <button class="btn-secondary" id="btnZipSelected" title="Tải ZIP các QR đã chọn">ZIP QR (đã chọn)</button>
-        <button class="btn-secondary" id="btnPrintA4" title="In nhiều tem trên 1 A4 cho các dòng đã chọn">In A4 (đã chọn)</button>
-        <button class="btn-secondary" id="btnClearAll" title="Xóa toàn bộ trong trình duyệt (không ảnh hưởng GitHub)">Xóa toàn bộ</button>
-        <button class="btn-secondary" id="btnAddDemo" title="Thêm 1 dòng mẫu để thử nhanh">Thêm dòng test</button>
-      </div>
-      <div id="list"></div>
-    </section>
+    </div>
+    <span class="muted">* Bắt buộc</span>
+    <div id="createStatus" class="muted" style="margin-top:6px; display:none; color:#0a0; font-weight:600;"></div>
+  </section>  
+    <!-- Đưa danh sách QR lên trên -->
+  <section class="card">
+    <h2>Danh sách đã nhập</h2>
+    <div id="list"></div>
+    <!-- Đưa toolbar xuống dưới list -->
+    <div class="toolbar" style="margin-top:12px;">
+      <input id="q" type="text" placeholder="Tìm theo tên/chi nhánh/mã KH/sđt/cán bộ" style="min-width:220px; padding:10px 10px; border:1px solid #ddd; border-radius:10px;" />
+      <button class="btn-secondary" id="btnZipSelected" title="Tải ZIP các QR đã chọn">ZIP QR (đã chọn)</button>
+      <button class="btn-secondary" id="btnPrintA4" title="In nhiều tem trên 1 A4 cho các dòng đã chọn">In A4 (đã chọn)</button>
+      <button class="btn-secondary" id="btnClearAll" title="Xóa toàn bộ trong trình duyệt (không ảnh hưởng GitHub)">Xóa toàn bộ</button>
+      <button class="btn-secondary" id="btnAddDemo" title="Thêm 1 dòng mẫu để thử nhanh">Thêm dòng test</button>
+    </div>
+  </section>
 
     
   </main>
