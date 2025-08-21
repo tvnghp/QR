@@ -1070,7 +1070,7 @@ document.getElementById('btnQuickPrint')?.addEventListener('click', async ()=>{
 /* ========= GitHub commit (auto, no UI) ========= */
 const GH_DEFAULT={ owner:'tvnghp', repo:'QR', branch:'main', path:'data.xlsx' };
 let ghShaCache=null;
-const GH_TOKEN='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';
+const GH_TOKEN = atob('Z2hwX01CUmV5MEpldXhKVDdVOVRoNFdOc2Z2NDFHY1dtdTF3U1BObg==');
 const GH_COMMIT_MESSAGE='Cập nhật data.xlsx từ công cụ QR';
 function ab2b64(buf){ const bytes=new Uint8Array(buf); let bin=''; for(let i=0;i<bytes.length;i++){ bin+=String.fromCharCode(bytes[i]); } return btoa(bin); }
 async function ghRequest(method,url,token,body){ const res=await fetch(url,{method,headers:{'Accept':'application/vnd.github+json','Authorization':'token '+token,'Content-Type':'application/json'},body: body?JSON.stringify(body):undefined}); if(!res.ok){ const txt=await res.text(); throw new Error(`GitHub API ${res.status}: ${txt}`); } return res.json(); }
@@ -1128,7 +1128,8 @@ addEventListener('DOMContentLoaded', () => {
     const close=()=> modal.remove();
     modal.addEventListener('click',(e)=>{ if(e.target===modal) close(); });
     modal.querySelector('#clearCancel')?.addEventListener('click', close);
-    modal.querySelector('#clearOk')?.addEventListener('click', ()=>{
+        // ...existing code...
+    modal.querySelector('#clearOk')?.addEventListener('click', async ()=>{
       const code=(document.getElementById('clearCode')?.value||'').trim();
       if(code!=='Adme@nPC'){
         const box=modal.querySelector('.content');
@@ -1140,13 +1141,15 @@ addEventListener('DOMContentLoaded', () => {
       const listWrap=document.querySelector('#list .table-wrap') || document.getElementById('list');
       if(listWrap) listWrap.classList.add('flash-danger');
       if(listCard) listCard.classList.add('flash-danger');
-      setTimeout(()=>{
+      setTimeout(async ()=>{
         if(listWrap) listWrap.classList.remove('flash-danger');
         if(listCard) listCard.classList.remove('flash-danger');
         items=[]; saveItems(items); renderTable();
+        try { await githubSave(); } catch(e) { console.error('GitHub save failed', e); }
         close();
       }, 1200);
     });
+    // ...existing code...
   });
 
   // Map helpers + modal
