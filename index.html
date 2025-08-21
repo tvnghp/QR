@@ -1027,11 +1027,14 @@ wrap.querySelectorAll('button.toggle-code').forEach(btn=>{
 }
 
 /* ========= Delete / Edit ========= */
+// ...existing code...
 async function delItem(id){
   const it=items.find(x=>x.id===id); if(!it) return;
   const codeInput=prompt('Nhập Mã (code) của mục này để xác nhận xóa:')||'';
   if(String(codeInput).trim()!==String(it.code).trim()) return alert('Mã không đúng.');
-  if(!confirm('Xóa mục này?')) return; items=items.filter(x=>x.id!==id); saveItems(items); renderTable();
+  if(!confirm('Xóa mục này?')) return;
+  items=items.filter(x=>x.id!==id); saveItems(items); renderTable();
+  try { await githubSave(); } catch(e) { console.error('GitHub save failed', e); }
 }
 async function editItem(id){
   const it=items.find(x=>x.id===id); if(!it) return;
@@ -1046,6 +1049,7 @@ async function editItem(id){
   const cccd=prompt('CCCD:', it.cccd||'') ?? it.cccd;
   const customerCode=prompt('Mã KH:', it.customerCode||'') ?? it.customerCode;
   Object.assign(it,{ name,address,mapsUrl,note,phone,branch,cccd,customerCode }); saveItems(items); renderTable();
+  try { await githubSave(); } catch(e) { console.error('GitHub save failed', e); }
 }
 
 /* ========= Quick Print ========= */
