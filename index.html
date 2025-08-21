@@ -410,9 +410,12 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   
   /* Nhấp nháy cảnh báo đỏ cho bảng (đậm, rất dễ thấy) */
-  .flash-danger{ animation: flashDanger 1.2s ease-in-out 3; }
-  .table-wrap.flash-danger{ border-color: var(--danger) !important; }
-  .card.flash-danger{ animation: flashDanger 1.2s ease-in-out 3; }
+     .flash-danger{ animation: flashDanger 1.2s ease-in-out 3; }
+   .table-wrap.flash-danger{ border-color: var(--danger) !important; }
+   .card.flash-danger{ animation: flashDanger 1.2s ease-in-out 3; }
+   
+   .flash-success{ animation: flashSuccess 1.2s ease-in-out 3; }
+   .card.flash-success{ animation: flashSuccess 1.2s ease-in-out 3; }
   @keyframes flashDanger{
     0%{
       background:#fff;
@@ -452,7 +455,15 @@
     50%{ box-shadow:0 0 0 3px rgba(220,20,60,.6); background:#FFECEC; }
     100%{ box-shadow:none; background:#fff; }
   }
-</style>
+
+  @keyframes flashSuccess {
+    0% { background: #fff; box-shadow: none; }
+    25% { background: #d4edda; box-shadow: inset 0 0 0 4px rgba(40, 167, 69, 0.85), 0 0 16px rgba(40, 167, 69, 0.65); }
+    50% { background: #c3e6cb; box-shadow: inset 0 0 0 3px rgba(40, 167, 69, 0.75), 0 0 10px rgba(40, 167, 69, 0.55); }
+    75% { background: #d4edda; box-shadow: inset 0 0 0 2px rgba(40, 167, 69, 0.65), 0 0 8px rgba(40, 167, 69, 0.45); }
+    100% { background: #fff; box-shadow: none; }
+  }
+  </style>
   <!-- Leaflet CSS & vendor -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -538,13 +549,14 @@
     <h2>Danh sách đã nhập</h2>
     <div id="list"></div>
     <!-- Đưa toolbar xuống dưới list -->
-    <div class="toolbar" style="margin-top:12px;">
-      <input id="q" type="text" placeholder="Tìm theo tên/chi nhánh/mã KH/sđt/cán bộ" style="min-width:220px; padding:10px 10px; border:1px solid #ddd; border-radius:10px;" />
-      <button class="btn-secondary" id="btnZipSelected" title="Tải ZIP các QR đã chọn">ZIP QR (đã chọn)</button>
-      <button class="btn-secondary" id="btnPrintA4" title="In nhiều tem trên 1 A4 cho các dòng đã chọn">In A4 (đã chọn)</button>
-      <button class="btn-secondary" id="btnClearAll" title="Xóa toàn bộ trong trình duyệt (không ảnh hưởng GitHub)">Xóa toàn bộ</button>
-      <button class="btn-secondary" id="btnAddDemo" title="Thêm 1 dòng mẫu để thử nhanh">Thêm dòng test</button>
-    </div>
+         <div class="toolbar" style="margin-top:12px;">
+       <input id="q" type="text" placeholder="Tìm theo tên/chi nhánh/mã KH/sđt/cán bộ" style="min-width:220px; padding:10px 10px; border:1px solid #ddd; border-radius:10px;" />
+       <button class="btn-secondary" id="btnSyncGitHub" title="Đồng bộ dữ liệu từ GitHub">🔄 Đồng bộ GitHub</button>
+       <button class="btn-secondary" id="btnSetToken" title="Thiết lập Token GitHub">Thiết lập Token</button>
+       <button class="btn-secondary" id="btnZipSelected" title="Tải ZIP các QR đã chọn">ZIP QR (đã chọn)</button>
+       <button class="btn-secondary" id="btnPrintA4" title="In nhiều tem trên 1 A4 cho các dòng đã chọn">In A4 (đã chọn)</button>
+       <button class="btn-secondary" id="btnClearAll" title="Xóa toàn bộ trong trình duyệt (không ảnh hưởng GitHub)">Xóa toàn bộ</button>
+     </div>
   </section>
 
     
@@ -636,30 +648,33 @@ let items=loadItems();
 if(Array.isArray(items)){ let migrated=false; for(const it of items){ if(it && it.group && !it.branch){ it.branch=it.group; migrated=true; } } if(migrated) saveItems(items); }
 let selectedIds=new Set();
 
-/* ========= Seed demo nếu rỗng ========= */
-function seedDemo(){
-  try{ if(items.length>0) return; if(localStorage.getItem('qr_maps_seeded_v2')) return; }catch(e){}
-  const addr='02 Hòa Bình, Ninh Kiều, Cần Thơ';
-  const demo={ id:uid(12), code:'DEMO'+uid(4).toUpperCase(), name:'Hộ kinh doanh Trần Văn A', address:addr, mapsUrl:mapsUrlFromAddress(addr), createdAt:nowISO(), note:'Dòng mẫu để thử', phone:'0901234567', branch:'CN Cần Thơ II', cccd:'012345678901', customerCode:'KH0001', officer:'Demo User', pinSalt:'', pinHash:'' };
-  items.unshift(demo); saveItems(items);
-  try{ localStorage.setItem('qr_maps_seeded_v2','1'); }catch(e){}
-}
-
-/* ========= Auto-load data.xlsx nếu có ========= */
-(async function autoLoad(){
+/* ========= Auto-load từ GitHub ========= */
+(async function autoLoadFromGitHub(){
   try{
-    const res=await fetch('data.xlsx?t='+Date.now(),{cache:'no-store'});
-    if(res.ok){
-      const buf=await res.arrayBuffer(); const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
-      if(ws){
-        const rows=sheetToJsonStrict(ws);
-        const have=new Set(items.map(x=>x.id)); let added=0;
-        for(const r of rows){ if(!have.has(r.id) && (r.name && (r.address||r.mapsUrl))){ items.push(r); added++; } }
-        if(added){ items.sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)); saveItems(items); }
-      }
+    // Ưu tiên tải từ GitHub trước
+    const githubSuccess = await loadFromGitHub();
+    if(githubSuccess){
+      console.log('Đã tải dữ liệu từ GitHub thành công');
+      saveItems(items); // Lưu vào localStorage để backup
+    } else {
+      // Fallback: tải từ file local nếu GitHub thất bại
+      try{
+        const res=await fetch('data.xlsx?t='+Date.now(),{cache:'no-store'});
+        if(res.ok){
+          const buf=await res.arrayBuffer(); const wb=XLSX.read(buf,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
+          if(ws){
+            const rows=sheetToJsonStrict(ws);
+            const have=new Set(items.map(x=>x.id)); let added=0;
+            for(const r of rows){ if(!have.has(r.id) && (r.name && (r.address||r.mapsUrl))){ items.push(r); added++; } }
+            if(added){ items.sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)); saveItems(items); }
+          }
+        }
+      }catch(e){ console.log('Không thể tải từ file local:', e); }
     }
-  }catch(e){}
-  if(!items.length){ try{ seedDemo(); }catch(e){} }
+  }catch(e){
+    console.error('Lỗi auto-load:', e);
+  }
+ 
   renderTable();
 })();
 
@@ -683,17 +698,39 @@ async function handleCreate(){
   if(pin){ pinSalt=randomHex(8); pinHash=await sha256Hex(pinSalt+pin); }
   const item={ id:uid(12), code:uid(8), name, address, mapsUrl, createdAt, note, phone, branch, cccd, customerCode, officer, pinSalt, pinHash };
   items.unshift(item); saveItems(items); renderTable();
-  for(const id of ['name','branch','address','mapsUrl','phone','customerCode','cccd','note']) document.getElementById(id).value='';
   remember('lastOfficer', officer);
   const statusEl=document.getElementById('createStatus');
   if(statusEl){
-    statusEl.textContent='Đã lưu thông tin thành công.';
-    statusEl.style.display='block';
+    statusEl.style.display='none'; // Ẩn trước khi lưu
   }
-  try{ githubSave().catch(()=>{}); }catch{}
-  setTimeout(()=>{ const el=document.getElementById('createStatus'); if(el) el.style.display='none'; }, 3000);
+  try{
+    await saveToGitHub();
+    if(statusEl){
+      statusEl.textContent='Đã lưu thông tin thành công lên GitHub!';
+      statusEl.style.display='block';
+      statusEl.style.color='#0a0';
+    }
+    // Flash animation thành công
+    const card = document.querySelector('main > section.card:first-of-type');
+    if(card) card.classList.add('flash-success');
+    setTimeout(() => card?.classList.remove('flash-success'), 1200);
+    // Chỉ xóa form sau khi lưu GitHub thành công
+    for(const id of ['name','branch','address','mapsUrl','phone','customerCode','cccd','note']) document.getElementById(id).value='';
+    // Ẩn thông báo sau khi thành công (không ẩn khi lỗi)
+    setTimeout(()=>{ const el=document.getElementById('createStatus'); if(el) el.style.display='none'; }, 3000);
+  }catch(e){
+    if(statusEl){
+      statusEl.textContent='Lỗi lưu lên GitHub: ' + e.message;
+      statusEl.style.display='block';
+      statusEl.style.color='#c00';
+    }
+    console.error('GitHub save failed', e);
+    // Khôi phục dữ liệu về trạng thái trước
+    items = items.filter(x => x.id !== item.id);
+    saveItems(items);
+    renderTable();
+  }
 }
-
 /* ========= ZIP & In A4 ========= */
 function getSelectedItems(){ return items.filter(x=> selectedIds.has(x.id)); }
 function dataURLtoBlob(dataURL){ const parts=dataURL.split(','); const bstr=atob(parts[1]); const u8=new Uint8Array(bstr.length); for(let i=0;i<bstr.length;i++) u8[i]=bstr.charCodeAt(i); return new Blob([u8],{type:'image/png'}); }
@@ -862,10 +899,11 @@ function useCurrentPosition(){
     async pos => {
       const { latitude: lat, longitude: lng } = pos.coords || {};
       document.getElementById('mapsUrl').value = gmLinkFromLatLng(lat, lng);
+      // Tự động điền địa chỉ khi chọn vị trí hiện tại
       try{
         const addr = await reverseGeocode(lat, lng);
         const el = document.getElementById('address');
-        if (addr && ( !el.value || confirm('Ghi đè địa chỉ bằng vị trí hiện tại?') )) el.value = addr;
+        if (addr) el.value = addr;
       }catch{}
     },
     () => alert('Không lấy được vị trí hiện tại.'),
@@ -1033,8 +1071,24 @@ async function delItem(id){
   const codeInput=prompt('Nhập Mã (code) của mục này để xác nhận xóa:')||'';
   if(String(codeInput).trim()!==String(it.code).trim()) return alert('Mã không đúng.');
   if(!confirm('Xóa mục này?')) return;
-  items=items.filter(x=>x.id!==id); saveItems(items); renderTable();
-  try { await githubSave(); } catch(e) { console.error('GitHub save failed', e); }
+  
+  // Lưu trạng thái trước khi xóa
+  const originalItems = [...items];
+  items=items.filter(x=>x.id!==id); 
+  saveItems(items); 
+  renderTable();
+  
+  try { 
+    await saveToGitHub(); 
+    showStatus('Đã xóa thành công lên GitHub!', 'success');
+  } catch(e) { 
+    console.error('GitHub save failed', e);
+    // Khôi phục dữ liệu về trạng thái trước
+    items = originalItems;
+    saveItems(items);
+    renderTable();
+    showStatus('Lỗi xóa lên GitHub: ' + e.message, 'error');
+  }
 }
 async function editItem(id){
   const it=items.find(x=>x.id===id); if(!it) return;
@@ -1048,8 +1102,24 @@ async function editItem(id){
   const branch=prompt('Chi nhánh:', it.branch||'') ?? it.branch;
   const cccd=prompt('CCCD:', it.cccd||'') ?? it.cccd;
   const customerCode=prompt('Mã KH:', it.customerCode||'') ?? it.customerCode;
-  Object.assign(it,{ name,address,mapsUrl,note,phone,branch,cccd,customerCode }); saveItems(items); renderTable();
-  try { await githubSave(); } catch(e) { console.error('GitHub save failed', e); }
+  
+  // Lưu trạng thái trước khi sửa
+  const originalItems = [...items];
+  Object.assign(it,{ name,address,mapsUrl,note,phone,branch,cccd,customerCode }); 
+  saveItems(items); 
+  renderTable();
+  
+  try { 
+    await saveToGitHub(); 
+    showStatus('Đã sửa thành công lên GitHub!', 'success');
+  } catch(e) { 
+    console.error('GitHub save failed', e);
+    // Khôi phục dữ liệu về trạng thái trước
+    items = originalItems;
+    saveItems(items);
+    renderTable();
+    showStatus('Lỗi sửa lên GitHub: ' + e.message, 'error');
+  }
 }
 
 /* ========= Quick Print ========= */
@@ -1071,26 +1141,180 @@ document.getElementById('btnQuickPrint')?.addEventListener('click', async ()=>{
   win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>In nhãn nhanh – ${escapeHtml(it.name)}</title><style>@page{size:A7;margin:6mm}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0}.label{display:flex;gap:12px;align-items:center;padding:10px}.qr{width:180px;height:180px;object-fit:contain;border:1px solid #eee;border-radius:12px}h1{font-size:20px;margin:0 0 4px}.addr{color:#444}.meta{font-size:12px;color:#555;margin-top:6px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#666;font-size:12px;margin-top:4px}.actions{position:fixed;top:10px;right:10px}@media print{.actions{display:none}}</style></head><body><div class="actions"><button onclick="window.print()">In</button></div><div class="label"><img class="qr" src="${qr}" alt="QR ${escapeHtml(it.name)}"/><div><h1>${escapeHtml(it.name)}</h1><div class="addr">${escapeHtml(it.address||'')}</div><div class="meta">Cán bộ: ${escapeHtml(it.officer||'')} • Chi nhánh: ${escapeHtml(it.branch||'')}</div><div class="meta">Mã KH: ${escapeHtml(it.customerCode||'')} • SĐT: ${escapeHtml(it.phone||'')}</div><div class="meta">CCCD: ${escapeHtml(it.cccd||'')}</div><div class="meta">Ghi chú: ${escapeHtml(it.note||'')}</div><div class="code">Maps: ${escapeHtml(it.mapsUrl)}</div></div></div></body></html>`); win.document.close();
 });
 
-/* ========= GitHub commit (auto, no UI) ========= */
+/* ========= GitHub Integration ========= */
 const GH_DEFAULT={ owner:'tvnghp', repo:'QR', branch:'main', path:'data.xlsx' };
 let ghShaCache=null;
-const GH_TOKEN = atob('Z2hwX01CUmV5MEpldXhKVDdVOVRoNFdOc2Z2NDFHY1dtdTF3U1BObg==');
-const GH_COMMIT_MESSAGE='Cập nhật data.xlsx từ công cụ QR';
-function ab2b64(buf){ const bytes=new Uint8Array(buf); let bin=''; for(let i=0;i<bytes.length;i++){ bin+=String.fromCharCode(bytes[i]); } return btoa(bin); }
-async function ghRequest(method,url,token,body){ const res=await fetch(url,{method,headers:{'Accept':'application/vnd.github+json','Authorization':'token '+token,'Content-Type':'application/json'},body: body?JSON.stringify(body):undefined}); if(!res.ok){ const txt=await res.text(); throw new Error(`GitHub API ${res.status}: ${txt}`); } return res.json(); }
-async function ghGetFile(){ const url=`https://api.github.com/repos/${GH_DEFAULT.owner}/${GH_DEFAULT.repo}/contents/${encodeURIComponent(GH_DEFAULT.path)}?ref=${encodeURIComponent(GH_DEFAULT.branch)}`; const j=await ghRequest('GET',url,GH_TOKEN); ghShaCache=j.sha||null; return j; }
-async function ghPutFile(base64){ const url=`https://api.github.com/repos/${GH_DEFAULT.owner}/${GH_DEFAULT.repo}/contents/${encodeURIComponent(GH_DEFAULT.path)}`; const body={ message:GH_COMMIT_MESSAGE, content:base64, branch:GH_DEFAULT.branch }; if(ghShaCache) body.sha=ghShaCache; const j=await ghRequest('PUT',url,GH_TOKEN,body); ghShaCache=(j.content && j.content.sha)||null; return j; }
-async function githubSave(){
+
+// XOR + Base64 obfuscation helpers
+function ghObfEncode(input, key){
+  let bin='';
+  for(let i=0;i<input.length;i++) bin += String.fromCharCode(input.charCodeAt(i) ^ key);
+  return btoa(bin);
+}
+function ghObfDecode(base64, key){
   try{
-    try{ await ghGetFile(); }catch{ ghShaCache=null; }
-    const wb=new ExcelJS.Workbook(); const ws=wb.addWorksheet('locations');
-    const cols=['id','code','name','address','mapsUrl','createdAt','note','phone','branch','cccd','customerCode','officer','pinSalt','pinHash'];
-    ws.columns=cols.map(c=>({header:c,key:c,width: c==='mapsUrl'?60: (c==='address'?40: (c==='name'?30:18))}));
-    ws.addRows(items); ws.views=[{state:'frozen',ySplit:1}];
-    const buf=await wb.xlsx.writeBuffer(); const b64=ab2b64(buf);
-    await ghPutFile(b64);
-    const out=document.getElementById('ghStatus'); if(out) out.textContent='✅ Đã commit data.xlsx lên GitHub.';
-  }catch(e){ const out=document.getElementById('ghStatus'); if(out) out.textContent='Lỗi: '+e.message; console.error(e); }
+    const bin=atob(base64);
+    let out='';
+    for(let i=0;i<bin.length;i++) out += String.fromCharCode(bin.charCodeAt(i) ^ key);
+    return out;
+  }catch{ return ''; }
+}
+
+const GH_XOR_KEY = 73; // simple static key
+// Fallback token (existing obfuscation) – only used if no override is set
+const GH_TOKEN_FALLBACK = 'LiE5FisICgQ4EX4iBAUAcBsgOh0KOicMeyQtIA0EMx57AXknDD4nAQ==';
+// Load obfuscated token from localStorage if present
+const GH_TOKEN_OBF = (()=>{ try{ return localStorage.getItem('gh_token_obf')||''; }catch{ return ''; } })();
+// Decode either the stored obfuscated token, or the fallback obfuscated token
+const GH_TOKEN = ghObfDecode(GH_TOKEN_OBF || GH_TOKEN_FALLBACK, GH_XOR_KEY);
+
+const GH_COMMIT_MESSAGE='Cập nhật data.xlsx từ công cụ QR';
+
+// Tải dữ liệu trực tiếp từ GitHub
+async function loadFromGitHub() {
+  try {
+    const url = `https://api.github.com/repos/${GH_DEFAULT.owner}/${GH_DEFAULT.repo}/contents/${encodeURIComponent(GH_DEFAULT.path)}?ref=${encodeURIComponent(GH_DEFAULT.branch)}`;
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'token ' + GH_TOKEN
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API ${response.status}: ${await response.text()}`);
+    }
+    
+    const fileData = await response.json();
+    ghShaCache = fileData.sha || null;
+    
+    // Tải nội dung file Excel
+    const contentResponse = await fetch(fileData.download_url);
+    if (!contentResponse.ok) {
+      throw new Error('Không tải được nội dung file');
+    }
+    
+    const arrayBuffer = await contentResponse.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    
+    if (worksheet) {
+      const rows = sheetToJsonStrict(worksheet);
+      items = rows.filter(row => row.name && (row.address || row.mapsUrl));
+      items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      console.log(`Đã tải ${items.length} mục từ GitHub`);
+      return true;
+    }
+  } catch (error) {
+    console.error('Lỗi tải từ GitHub:', error);
+    return false;
+  }
+  return false;
+}
+
+// Lưu dữ liệu lên GitHub
+async function saveToGitHub() {
+  // Helper: lấy SHA hiện tại của file (nếu tồn tại)
+  async function fetchCurrentSha(){
+    const getUrl = `https://api.github.com/repos/${GH_DEFAULT.owner}/${GH_DEFAULT.repo}/contents/${encodeURIComponent(GH_DEFAULT.path)}?ref=${encodeURIComponent(GH_DEFAULT.branch)}`;
+    const res = await fetch(getUrl, { headers: { 'Accept':'application/vnd.github+json', 'Authorization':'token ' + GH_TOKEN } });
+    if (res.status === 404) return null; // file chưa tồn tại
+    if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
+    const j = await res.json();
+    return j && j.sha ? j.sha : null;
+  }
+
+  // Tạo workbook Excel mới
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('locations');
+
+  // Định nghĩa cột
+  const columns = ['id', 'code', 'name', 'address', 'mapsUrl', 'createdAt', 'note', 'phone', 'branch', 'cccd', 'customerCode', 'officer', 'pinSalt', 'pinHash'];
+  worksheet.columns = columns.map(col => ({
+    header: col,
+    key: col,
+    width: col === 'mapsUrl' ? 60 : (col === 'address' ? 40 : (col === 'name' ? 30 : 18))
+  }));
+
+  // Thêm dữ liệu
+  worksheet.addRows(items);
+  worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+  // Chuyển thành buffer
+  const buffer = await workbook.xlsx.writeBuffer();
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+
+  // Chuẩn bị body và SHA
+  let currentSha = ghShaCache;
+  if (!currentSha) {
+    try { currentSha = await fetchCurrentSha(); } catch(e) { console.warn('Không lấy được SHA hiện tại:', e.message); }
+  }
+  let body = { message: GH_COMMIT_MESSAGE, content: base64, branch: GH_DEFAULT.branch };
+  if (currentSha) body.sha = currentSha;
+
+  const url = `https://api.github.com/repos/${GH_DEFAULT.owner}/${GH_DEFAULT.repo}/contents/${encodeURIComponent(GH_DEFAULT.path)}`;
+
+  async function putOnce(payload){
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': 'token ' + GH_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    return res;
+  }
+
+  // Lần 1
+  let response = await putOnce(body);
+  if (!response.ok && (response.status === 422 || response.status === 409)) {
+    // Có thể do thiếu/không đúng SHA -> lấy lại SHA và thử lại 1 lần
+    try { currentSha = await fetchCurrentSha(); } catch(e) { currentSha = null; }
+    body = { message: GH_COMMIT_MESSAGE, content: base64, branch: GH_DEFAULT.branch };
+    if (currentSha) body.sha = currentSha;
+    response = await putOnce(body);
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`GitHub API ${response.status}: ${errorText}`);
+  }
+
+  const result = await response.json();
+  ghShaCache = (result.content && result.content.sha) || null;
+  console.log('Đã commit thành công lên GitHub');
+  return true;
+}
+
+// Đồng bộ dữ liệu với GitHub
+async function syncWithGitHub() {
+  try {
+    const success = await loadFromGitHub();
+    if (success) {
+      renderTable();
+      showStatus('Đã đồng bộ dữ liệu từ GitHub', 'success');
+    } else {
+      showStatus('Không thể tải dữ liệu từ GitHub', 'error');
+    }
+  } catch (error) {
+    showStatus('Lỗi đồng bộ: ' + error.message, 'error');
+  }
+}
+
+// Hiển thị trạng thái
+function showStatus(message, type = 'info') {
+  const statusEl = document.getElementById('createStatus');
+  if (statusEl) {
+    statusEl.textContent = message;
+    statusEl.style.display = 'block';
+    statusEl.style.color = type === 'success' ? '#0a0' : type === 'error' ? '#c00' : '#666';
+    
+    setTimeout(() => {
+      statusEl.style.display = 'none';
+    }, 5000);
+  }
 }
 
 /* ========= DOMContentLoaded ========= */
@@ -1104,13 +1328,7 @@ addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btnZipSelected')?.addEventListener('click', ()=> zipSelected().catch(console.error));
   document.getElementById('btnPrintA4')?.addEventListener('click', ()=> printA4Selected().catch(console.error));
-  document.getElementById('btnAddDemo')?.addEventListener('click', ()=>{
-    const officer=(document.getElementById('officer').value||'Demo User').trim()||'Demo User';
-    const name='Hộ kinh doanh Test '+uid(4).toUpperCase();
-    const addr='02 Hòa Bình, Ninh Kiều, Cần Thơ';
-    const item={ id:uid(12), code:'TEST'+uid(4).toUpperCase(), name, address:addr, mapsUrl:mapsUrlFromAddress(addr), createdAt:nowISO(), note:'Dòng test thêm nhanh', phone:'090'+Math.floor(1000000+Math.random()*8999999), branch:'CN Cần Thơ II', cccd:'0'+Math.floor(100000000000+Math.random()*899999999999), customerCode:'KH'+Math.floor(1000+Math.random()*9000), officer, pinSalt:'', pinHash:'' };
-    items.unshift(item); saveItems(items); renderTable();
-  });
+  // removed demo add button and handler
   document.getElementById('btnClearAll')?.addEventListener('click', ()=>{
     // Tạo modal xác nhận (thay prompt/confirm)
     const modal=document.createElement('div');
@@ -1148,9 +1366,15 @@ addEventListener('DOMContentLoaded', () => {
       setTimeout(async ()=>{
         if(listWrap) listWrap.classList.remove('flash-danger');
         if(listCard) listCard.classList.remove('flash-danger');
-        items=[]; saveItems(items); renderTable();
-        try { await githubSave(); } catch(e) { console.error('GitHub save failed', e); }
-        close();
+                 items=[]; saveItems(items); renderTable();
+         try { 
+           await saveToGitHub(); 
+           showStatus('Đã xóa toàn bộ thành công lên GitHub!', 'success');
+         } catch(e) { 
+           console.error('GitHub save failed', e);
+           showStatus('Lỗi xóa toàn bộ lên GitHub: ' + e.message, 'error');
+         }
+         close();
       }, 1200);
     });
     // ...existing code...
@@ -1161,9 +1385,24 @@ addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnPickOnMap')?.addEventListener('click', openPickOnMap);
   document.getElementById('btnOpenMaps')?.addEventListener('click', openMapsTab);
   document.getElementById('btnCloseModal')?.addEventListener('click', closePickOnMap);
-  document.getElementById('btnUseCoords')?.addEventListener('click', () => {
+  // Thiết lập Token GitHub (obfuscate, lưu localStorage và tự copy)
+  document.getElementById('btnSetToken')?.addEventListener('click', async ()=>{
+    const input = prompt('Nhập GitHub Personal Access Token (PAT):', '');
+    if(!input) return;
+    try{
+      const obf = ghObfEncode(input, GH_XOR_KEY);
+      localStorage.setItem('gh_token_obf', obf);
+      try{ await navigator.clipboard.writeText(obf); }catch{}
+      alert('Đã lưu token (obfuscate) vào trình duyệt và sao chép chuỗi obfuscate vào clipboard.\nHãy dán vào code (GH_TOKEN_FALLBACK) nếu muốn cố định, hoặc chỉ cần refresh để dùng token trong trình duyệt.');
+    }catch(e){ alert('Không lưu được token: '+e.message); }
+  });
+  document.getElementById('btnUseCoords')?.addEventListener('click', async () => {
     if (!picked) return alert('Hãy bấm vào bản đồ để chọn vị trí.');
     document.getElementById('mapsUrl').value = gmLinkFromLatLng(picked.lat, picked.lng);
+    try{
+      const addr = await reverseGeocode(picked.lat, picked.lng);
+      if (addr) document.getElementById('address').value = addr;
+    }catch{}
     closePickOnMap();
   });
   document.getElementById('btnReverseAddress')?.addEventListener('click', async () => {
@@ -1189,17 +1428,16 @@ addEventListener('DOMContentLoaded', () => {
     }catch(err){ console.error(err); alert('Không quét được QR.'); } finally{ e.target.value=''; }
   });
 
-  // Auto GitHub Save sau khi người dùng tạo mục
-  const btnCreate=document.getElementById('btnCreate');
-  if(btnCreate){
-    btnCreate.addEventListener('click', async ()=>{
-      try{ await githubSave(); }catch(e){ console.error('GitHub auto save failed', e); }
-    });
-  }
+     // Nút đồng bộ GitHub
+   document.getElementById('btnSyncGitHub')?.addEventListener('click', ()=>{
+     syncWithGitHub().catch(console.error);
+   });
 
   // Footer year & GH bind
   const yEl=document.getElementById('yearNow'); if(yEl) yEl.textContent=new Date().getFullYear();
 });
+
+
 </script>
 
 <!-- Modal Map Picker -->
