@@ -1163,10 +1163,8 @@ function ghObfDecode(base64, key){
 const GH_XOR_KEY = 73; // simple static key
 // Fallback token (existing obfuscation) – only used if no override is set
 const GH_TOKEN_FALLBACK = 'LiE5FisICgQ4EX4iBAUAcBsgOh0KOicMeyQtIA0EMx57AXknDD4nAQ==';
-// Load obfuscated token from localStorage if present
-const GH_TOKEN_OBF = (()=>{ try{ return localStorage.getItem('gh_token_obf')||''; }catch{ return ''; } })();
-// Decode either the stored obfuscated token, or the fallback obfuscated token
-const GH_TOKEN = ghObfDecode(GH_TOKEN_OBF || GH_TOKEN_FALLBACK, GH_XOR_KEY);
+// USE PLAIN TOKEN (encryption disabled by request)
+const GH_TOKEN = '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';
 
 const GH_COMMIT_MESSAGE='Cập nhật data.xlsx từ công cụ QR';
 
