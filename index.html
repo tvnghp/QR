@@ -635,21 +635,23 @@ function drawRoundedRect(ctx,x,y,w,h,r){
 
 /* ========= Schema & state ========= */
 const HEADERS=['id','code','name','address','mapsUrl','createdAt','note','phone','branch','cccd','customerCode','officer','pinSalt','pinHash'];
-function loadItems(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||[] }catch(e){ return [] } }
-function saveItems(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+//function loadItems(){ try{ return JSON.parse(localStorage.getItem(LS_KEY))||[] }catch(e){ return [] } }
+function loadItems(){ return []; } // không dùng nữa
+//function saveItems(arr){ localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+function saveItems(){ /* no-op: không lưu local */ }
 function sheetToJsonStrict(ws){
   const arr=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
   return arr.map(r=>({ id:r.id??'', code:r.code??'', name:r.name??'', address:r.address??'', mapsUrl:r.mapsUrl??'', createdAt:r.createdAt??'',
     note:r.note??'', phone:r.phone??'', branch:r.branch ?? r.group ?? '', cccd:r.cccd??'', customerCode:r.customerCode??'',
     officer:r.officer??'', pinSalt:r.pinSalt??'', pinHash:r.pinHash??'' }));
 }
-let items=loadItems();
+let items=[];//loadItems();
 // migrate group -> branch
 if(Array.isArray(items)){ let migrated=false; for(const it of items){ if(it && it.group && !it.branch){ it.branch=it.group; migrated=true; } } if(migrated) saveItems(items); }
 let selectedIds=new Set();
 
 /* ========= Auto-load từ GitHub ========= */
-(async function autoLoadFromGitHub(){
+/*(async function autoLoadFromGitHub(){
   try{
     // Ưu tiên tải từ GitHub trước
     const githubSuccess = await loadFromGitHub();
@@ -676,7 +678,7 @@ let selectedIds=new Set();
   }
  
   renderTable();
-})();
+})();*/
 
 /* ========= CRUD ========= */
 async function handleCreate(){
@@ -1143,30 +1145,130 @@ document.getElementById('btnQuickPrint')?.addEventListener('click', async ()=>{
 
 /* ========= GitHub Integration ========= */
 const GH_DEFAULT={ owner:'tvnghp', repo:'QR', branch:'main', path:'data.xlsx' };
-let ghShaCache=null;
-
-// XOR + Base64 obfuscation helpers
-function ghObfEncode(input, key){
-  let bin='';
-  for(let i=0;i<input.length;i++) bin += String.fromCharCode(input.charCodeAt(i) ^ key);
-  return btoa(bin);
+/* ========= GitHub-only Boot ========= */
+function renderLoading(msg){
+  const wrap=document.getElementById('list');
+  if(!wrap) return;
+  wrap.innerHTML = `<div class="table-wrap"><div class="empty">${escapeHtml(msg)}</div></div>`;
 }
-function ghObfDecode(base64, key){
+function renderError(msg){
+  const wrap=document.getElementById('list');
+  if(!wrap) return;
+  wrap.innerHTML = `<div class="table-wrap flash-danger"><div class="empty">${escapeHtml(msg)}</div></div>`;
+}
+
+/*async function githubBoot(){
+  renderLoading('Đang tải dữ liệu từ GitHub…');
+
+  const token = getGhToken(); // dùng hàm bạn đã có ở modal token
+  if(!token){
+    renderError('Chưa thiết lập GitHub Token. Bấm “Thiết lập Token” để nhập PAT.');
+    // mở sẵn modal cho tiện
+    if(typeof openTokenModal==='function') openTokenModal();
+    return;
+  }
+
   try{
-    const bin=atob(base64);
-    let out='';
-    for(let i=0;i<bin.length;i++) out += String.fromCharCode(bin.charCodeAt(i) ^ key);
-    return out;
-  }catch{ return ''; }
+    const ok = await loadFromGitHub(); // CHỈ tải từ GitHub
+    if(!ok){
+      renderError('Không thể tải dữ liệu từ GitHub. Kiểm tra PAT/quyền repo rồi thử lại.');
+      if(typeof openTokenModal==='function') openTokenModal();
+      return;
+    }
+    // Thành công → hiển thị bảng + (tuỳ chọn) cache sang localStorage
+    saveItems(items);
+    renderTable();
+    showStatus('Đã nạp dữ liệu từ GitHub', 'success');
+  }catch(e){
+    console.error(e);
+    renderError('Lỗi tải từ GitHub. Mở “Thiết lập Token” để kiểm tra lại.');
+    if(typeof openTokenModal==='function') openTokenModal();
+  }
+}*/
+/* ========= Boot: ưu tiên GitHub, fallback data.xlsx (không LocalStorage) ========= */
+function renderLoading(msg){
+  const wrap=document.getElementById('list');
+  if(wrap) wrap.innerHTML = `<div class="table-wrap"><div class="empty">${escapeHtml(msg)}</div></div>`;
+}
+function renderError(msg){
+  const wrap=document.getElementById('list');
+  if(wrap) wrap.innerHTML = `<div class="table-wrap flash-danger"><div class="empty">${escapeHtml(msg)}</div></div>`;
 }
 
-const GH_XOR_KEY = 73; // simple static key
-// Fallback token (existing obfuscation) – only used if no override is set
-const GH_TOKEN_FALLBACK = 'LiE5FisICgQ4EX4iBAUAcBsgOh0KOicMeyQtIA0EMx57AXknDD4nAQ==';
-// USE PLAIN TOKEN (encryption disabled by request)
-const GH_TOKEN = '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';
+async function githubBoot(){
+  renderLoading('Đang tải dữ liệu từ GitHub…');
 
-const GH_COMMIT_MESSAGE='Cập nhật data.xlsx từ công cụ QR';
+  // Lấy PAT từ modal/token helper của bạn (không đụng LocalStorage nếu bạn đã no-op)
+  const token = (typeof getGhToken==='function') ? getGhToken() : (window.GH_TOKEN || '');
+
+  let ok = false;
+  if(token){                       // Có token thì thử GitHub trước
+    try { ok = await loadFromGitHub(); } catch { ok = false; }
+  }
+
+  if(!ok){
+    renderLoading('Không tải được từ GitHub. Đang dùng dữ liệu cục bộ (data.xlsx)…');
+    const okLocal = await loadFromLocalXlsx();
+    if(okLocal){
+      renderTable();
+      showStatus('Đã nạp từ data.xlsx (fallback).', 'info');
+    }else{
+      renderError('Không tải được dữ liệu: GitHub lỗi và cũng không tìm thấy data.xlsx.');
+    }
+    return;
+  }
+
+  // Thành công từ GitHub
+  renderTable();
+  showStatus('Đã nạp dữ liệu từ GitHub', 'success');
+}
+
+
+/* Gọi boot khi DOM sẵn sàng (sau khi đã định nghĩa GH_DEFAULT & loadFromGitHub) */
+addEventListener('DOMContentLoaded', () => {
+  // GỌI SỚM NHẤT TRONG HANDLER
+  githubBoot();
+});
+
+let ghShaCache=null;
+  /* ==== GitHub Token (Base64) ====
+   Lưu ý: Base64 chỉ là mã hoá/obfuscation nhẹ, KHÔNG bảo mật tuyệt đối.
+   Cách dùng:
+     - Option 1 (đề xuất): Lưu token vào localStorage (được mã hoá base64):
+          localStorage.setItem('gh_token_b64', btoa('ghp_xxx_your_token_here'));
+     - Option 2: Nhúng trực tiếp token (base64) vào file này bằng cách điền vào GH_TOKEN_B64_FILE.
+*/
+// ====== Token (base64) – LƯU Ý: không commit PAT thật vào repo public ======
+const GH_TOKEN_B64_FILE = 'Z2l0aHViX3BhdF8xMUFZS0lFTlkwbXcwalJNbzg3cThOX3E5a2pKa0pjZERhTzIycGJJc2NEVExOdGhKcjJBMFppaVhhMkwzZ1RmSEtIUEgyNUlGWGFvMWVzejNy'; // có thể để trống ''
+
+function getGhTokenB64(){
+  try { return localStorage.getItem('gh_token_b64') || GH_TOKEN_B64_FILE || ''; }
+  catch { return GH_TOKEN_B64_FILE || ''; }
+}
+function getGhToken(){
+  const b64 = getGhTokenB64();
+  try { return b64 ? atob(b64) : ''; } catch { return ''; }
+}
+function maskToken(t){
+  if(!t) return '(chưa có)';
+  if(t.length <= 10) return t[0] + '***' + t.slice(-2);
+  return t.slice(0,6) + '...' + t.slice(-4);
+}
+
+
+// Helper để set token dạng text rồi tự lưu base64 vào localStorage (gọi trong console nếu cần)
+function setGithubTokenPlain(tokenText){
+  try {
+    if (!tokenText || !tokenText.trim()) throw new Error('Token rỗng');
+    localStorage.setItem('gh_token_b64', btoa(tokenText.trim()));
+    console.log('Đã lưu token (base64) vào localStorage: gh_token_b64');
+  } catch (e) {
+    console.error('Không thể lưu token:', e);
+    alert('Không thể lưu token: ' + e.message);
+  }
+}
+
+  const GH_COMMIT_MESSAGE='Cập nhật data.xlsx từ công cụ QR';
 
 // Tải dữ liệu trực tiếp từ GitHub
 async function loadFromGitHub() {
@@ -1175,7 +1277,7 @@ async function loadFromGitHub() {
     const response = await fetch(url, {
       headers: {
         'Accept': 'application/vnd.github+json',
-        'Authorization': 'token ' + GH_TOKEN
+        'Authorization': 'token ' + getGhToken()
       }
     });
     
@@ -1209,13 +1311,32 @@ async function loadFromGitHub() {
   }
   return false;
 }
+// Fallback: nạp từ file data.xlsx nằm cạnh index.html (không dùng localStorage)
+async function loadFromLocalXlsx(){
+  try{
+    const res = await fetch('data.xlsx?t='+Date.now(), { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const buf = await res.arrayBuffer();
+    const wb  = XLSX.read(buf, { type: 'array' });
+    const ws  = wb.Sheets[wb.SheetNames[0]];
+    if(!ws) throw new Error('Không tìm thấy sheet đầu tiên');
+
+    const rows = sheetToJsonStrict(ws);
+    items = rows.filter(r => r.name && (r.address || r.mapsUrl));
+    items.sort((a,b)=> new Date(b.createdAt||0) - new Date(a.createdAt||0));
+    return true;
+  }catch(e){
+    console.error('Lỗi fallback local:', e);
+    return false;
+  }
+}
 
 // Lưu dữ liệu lên GitHub
 async function saveToGitHub() {
   // Helper: lấy SHA hiện tại của file (nếu tồn tại)
   async function fetchCurrentSha(){
     const getUrl = `https://api.github.com/repos/${GH_DEFAULT.owner}/${GH_DEFAULT.repo}/contents/${encodeURIComponent(GH_DEFAULT.path)}?ref=${encodeURIComponent(GH_DEFAULT.branch)}`;
-    const res = await fetch(getUrl, { headers: { 'Accept':'application/vnd.github+json', 'Authorization':'token ' + GH_TOKEN } });
+    const res = await fetch(getUrl, { headers: { 'Accept':'application/vnd.github+json', 'Authorization':'token ' + getGhToken } });
     if (res.status === 404) return null; // file chưa tồn tại
     if (!res.ok) throw new Error(`GitHub API ${res.status}: ${await res.text()}`);
     const j = await res.json();
@@ -1257,7 +1378,7 @@ async function saveToGitHub() {
       method: 'PUT',
       headers: {
         'Accept': 'application/vnd.github+json',
-        'Authorization': 'token ' + GH_TOKEN,
+        'Authorization': 'token ' + getGhToken(),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
@@ -1374,8 +1495,7 @@ addEventListener('DOMContentLoaded', () => {
          }
          close();
       }, 1200);
-    });
-    // ...existing code...
+    });    
   });
 
   // Map helpers + modal
@@ -1384,7 +1504,7 @@ addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnOpenMaps')?.addEventListener('click', openMapsTab);
   document.getElementById('btnCloseModal')?.addEventListener('click', closePickOnMap);
   // Thiết lập Token GitHub (obfuscate, lưu localStorage và tự copy)
-  document.getElementById('btnSetToken')?.addEventListener('click', async ()=>{
+  /*document.getElementById('btnSetToken')?.addEventListener('click', async ()=>{
     const input = prompt('Nhập GitHub Personal Access Token (PAT):', '');
     if(!input) return;
     try{
@@ -1393,7 +1513,7 @@ addEventListener('DOMContentLoaded', () => {
       try{ await navigator.clipboard.writeText(obf); }catch{}
       alert('Đã lưu token (obfuscate) vào trình duyệt và sao chép chuỗi obfuscate vào clipboard.\nHãy dán vào code (GH_TOKEN_FALLBACK) nếu muốn cố định, hoặc chỉ cần refresh để dùng token trong trình duyệt.');
     }catch(e){ alert('Không lưu được token: '+e.message); }
-  });
+  });*/
   document.getElementById('btnUseCoords')?.addEventListener('click', async () => {
     if (!picked) return alert('Hãy bấm vào bản đồ để chọn vị trí.');
     document.getElementById('mapsUrl').value = gmLinkFromLatLng(picked.lat, picked.lng);
@@ -1434,6 +1554,79 @@ addEventListener('DOMContentLoaded', () => {
   // Footer year & GH bind
   const yEl=document.getElementById('yearNow'); if(yEl) yEl.textContent=new Date().getFullYear();
 });
+// ====== Token Modal – mở/đóng và thao tác ======
+function openTokenModal(){
+  const m = document.getElementById('tokenModal');
+  updateTokenModalUI();
+  m.classList.remove('hidden');
+  document.body.classList.add('no-scroll');
+}
+function closeTokenModal(){
+  const m = document.getElementById('tokenModal');
+  m.classList.add('hidden');
+  document.body.classList.remove('no-scroll');
+}
+function updateTokenModalUI(){
+  const plain = getGhToken();
+  const b64 = getGhTokenB64();
+  const st = document.getElementById('tokStatus');
+  const pv = document.getElementById('tokPreview');
+  const b64El = document.getElementById('tokB64');
+  if(st) st.textContent = plain ? 'ĐÃ THIẾT LẬP' : 'CHƯA THIẾT LẬP';
+  if(pv) pv.textContent = maskToken(plain);
+  if(b64El) b64El.value = b64;
+  const inp = document.getElementById('tokPlain');
+  if(inp) inp.value = '';
+}
+
+document.getElementById('btnSetToken')?.addEventListener('click', openTokenModal);
+
+// Nút lưu (ghi base64 vào localStorage)
+document.addEventListener('click', async (e)=>{
+  const t = e.target;
+
+  if(t.id === 'tokSaveLS'){
+    const raw = (document.getElementById('tokPlain')?.value || '').trim();
+    if(!raw){ alert('Vui lòng nhập PAT (ghp_… hoặc github_pat_…)'); return; }
+    try{
+      localStorage.setItem('gh_token_b64', btoa(raw));
+      updateTokenModalUI();
+      alert('Đã lưu token vào trình duyệt (base64). Bạn có thể thử “🔄 Đồng bộ GitHub”.');
+    }catch(err){ alert('Không thể lưu token: '+err.message); }
+  }
+
+  // Mã hoá ô plain và copy Base64
+  if(t.id === 'tokCopyB64FromPlain'){
+    const raw = (document.getElementById('tokPlain')?.value || '').trim();
+    if(!raw){ alert('Nhập PAT ở ô trên trước đã.'); return; }
+    const b64 = btoa(raw);
+    try{ await navigator.clipboard.writeText(b64); alert('Đã copy Base64 từ ô nhập.'); }
+    catch{ prompt('Copy chuỗi Base64:', b64); }
+  }
+
+  // Copy Base64 hiện có (đang lưu)
+  if(t.id === 'tokCopyB64Current'){
+    const b64 = (document.getElementById('tokB64')?.value || '').trim();
+    if(!b64){ alert('Chưa có token trong localStorage.'); return; }
+    try{ await navigator.clipboard.writeText(b64); alert('Đã copy Base64 hiện có.'); }
+    catch{ prompt('Copy chuỗi Base64:', b64); }
+  }
+
+  // Xoá token khỏi localStorage
+  if(t.id === 'tokDelete'){
+    try{ localStorage.removeItem('gh_token_b64'); updateTokenModalUI(); alert('Đã xoá token khỏi trình duyệt.'); }
+    catch(err){ alert('Không xoá được: '+err.message); }
+  }
+
+  // Đóng modal
+  if(t.id === 'tokClose' || t.id === 'tokenModal'){
+    if(t.id === 'tokenModal') { // click nền tối
+      const content = document.querySelector('#tokenModal .content');
+      if(content && content.contains(e.target)) return; // click bên trong -> bỏ qua
+    }
+    closeTokenModal();
+  }
+});
 
 
 </script>
@@ -1453,6 +1646,45 @@ addEventListener('DOMContentLoaded', () => {
       <button id="btnReverseAddress" class="btn-secondary" type="button">Thử lấy địa chỉ</button>
     </div>
     <div id="pickedInfo" class="muted" style="margin-top:6px; min-height:18px;"></div>
+  </div>
+</div>
+<!-- Modal Thiết lập Token -->
+<div id="tokenModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tokenTitle">
+  <div class="content" style="width:min(560px,96vw);height:auto;padding:16px;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+      <h3 id="tokenTitle" style="margin:0; font-size:16px;">Thiết lập GitHub Token</h3>
+      <div style="flex:1"></div>
+      <button id="tokClose" class="btn-secondary" type="button">Đóng</button>
+    </div>
+
+    <div class="gh-wrap" style="display:block;">
+      <div class="muted" style="margin-bottom:10px;">
+        Trạng thái: <b id="tokStatus">CHƯA THIẾT LẬP</b> — Token: <span id="tokPreview" class="code">(chưa có)</span>
+      </div>
+
+      <label>Nhập PAT (ghp_… hoặc github_pat_…)</label>
+      <input id="tokPlain" type="password" placeholder="Dán PAT của bạn vào đây…"/>
+
+      <div class="actions" style="margin-top:10px;">
+        <button id="tokSaveLS" class="btn-primary">Lưu vào trình duyệt</button>
+        <button id="tokCopyB64FromPlain" class="btn-secondary">Mã hoá &amp; Copy Base64</button>
+      </div>
+
+      <label style="margin-top:12px;">Base64 đang lưu (localStorage.gh_token_b64)</label>
+      <input id="tokB64" type="text" readonly />
+
+      <div class="actions" style="margin-top:10px; justify-content:space-between;">
+        <div style="display:flex; gap:8px;">
+          <button id="tokCopyB64Current" class="btn-secondary">Copy Base64 hiện có</button>
+          <button id="tokDelete" class="btn-danger">Xoá token khỏi trình duyệt</button>
+        </div>
+        <button id="tokClose" class="btn-secondary">Đóng</button>
+      </div>
+
+      <div class="tip tip-wide" style="margin-top:12px;">
+        ⚠️ Base64 chỉ giúp che mờ PAT, KHÔNG phải bảo mật. Không commit PAT thật vào repo public.
+      </div>
+    </div>
   </div>
 </div>
 </body>
